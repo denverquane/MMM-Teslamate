@@ -1,0 +1,10 @@
+{
+  "name": "MMM-Teslamate",
+  "version": "0.0.1",
+  "description": "Display Tesla information, hooking into the Teslamate utility",
+  "author": "Denver Quane",
+  "dependencies": {
+    "mqtt": "^2.18.0",
+    "pg": "^7.12.0"
+  }
+}
