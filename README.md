@@ -13,7 +13,7 @@ Requires an active installation of [Teslamate](https://github.com/adriankumpf/te
 ```
 {
     module: 'MMM-Teslamate',
-   	position: 'bottom_left',
+    position: 'bottom_left',
     config: {
         mqttServers: [
             {
