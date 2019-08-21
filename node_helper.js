@@ -1,26 +1,8 @@
 var mqtt = require('mqtt');
 var NodeHelper = require("node_helper");
+import { ALL_MQTT_TOPICS } from "topics";
 
-var servers = [];
-
-// TODO export these for use in the teslamate.js?
-// TODO hook into config for the car ID
-var allTopics = [
-    'teslamate/cars/1/display_name',
-    'teslamate/cars/1/state',
-    'teslamate/cars/1/battery_level',
-    'teslamate/cars/1/ideal_battery_range_km',
-    'teslamate/cars/1/est_battery_range_km',
-    'teslamate/cars/1/plugged_in',
-    'teslamate/cars/1/charge_limit_soc',
-    'teslamate/cars/1/scheduled_charging_start_time',
-    'teslamate/cars/1/charge_energy_added',
-    'teslamate/cars/1/speed',
-    'teslamate/cars/1/outside_temp',
-    'teslamate/cars/1/inside_temp',
-    'teslamate/cars/1/locked',
-    'teslamate/cars/1/sentry_mode'
-];
+var globalServer = {};
 
 module.exports = NodeHelper.create({
 
@@ -37,14 +19,9 @@ module.exports = NodeHelper.create({
         console.log(this.name + ': Adding server: ', server);
         var serverKey = this.makeServerKey(server);
         var mqttServer = {}
-        var foundServer = false;
-        for (i = 0; i < servers.length; i++) {
-            if (servers[i].serverKey === serverKey) {
-                mqttServer = servers[i];
-                foundServer = true;
-            }
-        }
-        if (!foundServer) {
+        if (globalServer.serverKey === serverKey) {
+            mqttServer = globalServer;
+        } else {
             mqttServer.serverKey = serverKey;
             mqttServer.address = server.address;
             mqttServer.port = server.port;
@@ -54,20 +31,18 @@ module.exports = NodeHelper.create({
             if (server.password) mqttServer.options.password = server.password;
         }
 
-        for (i = 0; i < allTopics.length; i++) {
-            console.log(allTopics[i]);
-            mqttServer.topics.push(allTopics[i]);
+        for (i = 0; i < ALL_MQTT_TOPICS.length; i++) {
+            console.log(ALL_MQTT_TOPICS[i]);
+            mqttServer.topics.push(ALL_MQTT_TOPICS[i].topic);
         }
 
-        servers.push(mqttServer);
+        globalServer = mqttServer;
         this.startClient(mqttServer);
     },
 
     addConfig: function (config) {
         console.log('Adding config');
-        for (i = 0; i < config.mqttServers.length; i++) {
-            this.addServer(config.mqttServers[i]);
-        }
+        this.addServer(config.mqttServer);
     },
 
     startClient: function (server) {
