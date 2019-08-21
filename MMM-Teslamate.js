@@ -1,4 +1,20 @@
-import { ALL_MQTT_TOPICS } from "topics";
+const Topics = [
+  { topic: 'teslamate/cars/1/display_name' },
+  { topic: 'teslamate/cars/1/state' },
+  { topic: 'teslamate/cars/1/battery_level' },
+  { topic: 'teslamate/cars/1/ideal_battery_range_km' },
+  { topic: 'teslamate/cars/1/est_battery_range_km' },
+  { topic: 'teslamate/cars/1/plugged_in' },
+  { topic: 'teslamate/cars/1/charge_limit_soc' },
+  { topic: 'teslamate/cars/1/scheduled_charging_start_time' },
+  { topic: 'teslamate/cars/1/charge_energy_added' },
+  { topic: 'teslamate/cars/1/speed' },
+  { topic: 'teslamate/cars/1/outside_temp' },
+  { topic: 'teslamate/cars/1/inside_temp' },
+  { topic: 'teslamate/cars/1/locked' },
+  { topic: 'teslamate/cars/1/sentry_mode' },
+];
+
 Module.register("MMM-Teslamate", {
 
   getScripts: function () {
@@ -26,7 +42,7 @@ Module.register("MMM-Teslamate", {
 
   start: function () {
     console.log(this.name + ' started.');
-    this.subscriptions = ALL_MQTT_TOPICS;
+    this.subscriptions = Topics;
 
     console.log(this.name + ': Setting up connection to server');
 
@@ -169,3 +185,8 @@ Module.register("MMM-Teslamate", {
     return wrapper;
   }
 });
+
+module.exports = {
+    ALL_MQTT_TOPICS: ALL_MQTT_TOPICS
+};
+
