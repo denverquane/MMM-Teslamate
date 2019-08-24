@@ -30,7 +30,7 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
             //user: 'user',          // Leave out for no user
             //password: 'password',  // Leave out for no password
         },
-        imperial: true, //use imperial units (true = Miles & F) or metric (false = Km & C)
+        imperial: true, //use imperial units (false = Miles & F) or metric (true = Km & C)
         batteryDanger: 30, //below this value, battery levels are red
         batteryWarning: 50, //below this value, battery levels are yellow
         //above the warning value, battery levels are green
@@ -51,3 +51,4 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
 * Selectively enable/disable certain fields based on other state (for example, still show scheduled charge time if plugged in)
 * Display Teslamate "status" topic
 * Format and display Teslamate "scheduled charge time" topic
+* ~~~Proper Imperial/Metric conversion and formatting~~~
