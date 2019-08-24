@@ -1,3 +1,4 @@
+//TODO I could not get these to be global and shared between this file and node_helper...
 const Topics = [
   { topic: 'teslamate/cars/1/display_name' },
   { topic: 'teslamate/cars/1/state' },
@@ -33,7 +34,9 @@ Module.register("MMM-Teslamate", {
   // Default module config
   defaults: {
     mqttServer: {},
-    imperial: true
+    imperial: true,
+    batteryDanger: 30,
+    batteryWarning: 50, 
   },
 
   makeServerKey: function (server) {
@@ -92,31 +95,35 @@ Module.register("MMM-Teslamate", {
   },
 
   getDom: function () {
-    // TODO hook into config for imperial v. metric
     const wrapper = document.createElement('div');
+
+    //TODO These values are brittle, probably need a better way to check besides just using the explicit indices...
     const carName = this.subscriptions[0].value;
+    //TODO is this interesting to see displayed?
     const state = this.subscriptions[1].value;
     const battery = this.subscriptions[2].value;
-    const idealRange = (this.subscriptions[3].value / 1.609).toFixed(0);
-    const estRange = (this.subscriptions[4].value / 1.609).toFixed(0);
+    const idealRange = this.config.imperial ? this.subscriptions[3].value.toFixed(0) : (this.subscriptions[3].value / 1.609).toFixed(0);
+    const estRange = this.config.imperial ? this.subscriptions[4].value.toFixed(0) : (this.subscriptions[4].value / 1.609).toFixed(0);
     const pluggedIn = this.subscriptions[5].value;
     const chargeLimitSOC = this.subscriptions[6].value;
+
+    //TODO format this correctly
     const chargeStartTime = this.subscriptions[7].value
     const energyAdded = this.subscriptions[8].value;
-    const speed = (this.subscriptions[9].value / 1.609).toFixed(1);
-    const outside_temp = (this.subscriptions[10].value * 9 / 5 + 32).toFixed(1);
-    const inside_temp = (this.subscriptions[11].value * 9 / 5 + 32).toFixed(1);
+    const speed = this.config.imperial ? this.subscriptions[9].value.toFixed(1) : (this.subscriptions[9].value / 1.609).toFixed(1);
+    const outside_temp = this.config.imperial ? this.subscriptions[10].value.toFixed(1) : (this.subscriptions[10].value * 9 / 5 + 32).toFixed(1);
+    const inside_temp = this.config.imperial ? this.subscriptions[11].value.toFixed(1) : (this.subscriptions[11].value * 9 / 5 + 32).toFixed(1);
     const locked = this.subscriptions[12].value;
     const sentry = this.subscriptions[13].value;
 
     const getBatteryLevelClass = function (bl) {
-      if (bl < 30) {
+      if (bl < batteryDanger) {
         return 'danger';
       }
-      if (bl < 50) {
+      if (bl < batteryWarning) {
         return 'warning';
       }
-      if (bl >= 50) {
+      if (bl >= batteryWarning) {
         return 'ok';
       }
 
@@ -131,13 +138,20 @@ Module.register("MMM-Teslamate", {
         battery,
       )}">
       <span class="icon zmdi zmdi-battery zmdi-hc-fw"></span>
-      <span class="name">Current Battery / Max</span>
-      <span class="value">${battery} / ${chargeLimitSOC}%</span>
+      <span class="name">Current Battery Level</span>
+      <span class="value">${battery}%</span>
     </li>
+    <li class="mattribute battery-level battery-level-${getBatteryLevelClass(
+      chargeLimitSOC,
+    )}">
+    <span class="icon zmdi zmdi-battery zmdi-hc-fw"></span>
+    <span class="name">Max Battery Level</span>
+    <span class="value">${chargeLimitSOC}%</span>
+  </li>
     <li class="mattribute">
       <span class="icon zmdi zmdi-car zmdi-hc-fw"></span>
-      <span class="name">Ideal/Estimated Ranges</span>
-      <span class="value">${idealRange}/${estRange} Mi</span>
+      <span class="name">Ideal v. Est. Range</span>
+      <span class="value">${idealRange} v. ${estRange} ${this.config.imperial ? `Km/h` : `Mi/h`}</span>
     </li>
     ${pluggedIn ? `
     <li class="mattribute">
@@ -148,18 +162,18 @@ Module.register("MMM-Teslamate", {
     <li class="mattribute">
       <span class="icon zmdi zmdi-traffic zmdi-hc-fw"></span>
       <span class="name">Speed</span>
-      <span class="value">${speed} Mph</span>
+      <span class="value">${speed} ${this.config.imperial ? `Km/h` : `Mi/h`}</span>
     </li>
     ` : ``}
     <li class="mattribute">
       <span class="icon zmdi zmdi-cloud-outline-alt zmdi-hc-fw"></span>
       <span class="name">Inside</span>
-      <span class="value">${inside_temp}&deg;F</span>
+      <span class="value">${inside_temp}&deg;${this.config.imperial ? `C` : `F`}</span>
     </li>
     <li class="mattribute">
       <span class="icon zmdi zmdi-cloud-outline zmdi-hc-fw"></span>
       <span class="name">Outside</span>
-      <span class="value">${outside_temp}&deg;F</span>
+      <span class="value">${outside_temp}&deg;${this.config.imperial ? `C` : `F`}</span>
     </li>
     <li class="mattribute sentry-mode ${
       locked ? 'sentry-mode-active' : ''
@@ -177,7 +191,7 @@ Module.register("MMM-Teslamate", {
       <span class="icon zmdi zmdi-shield-security zmdi-hc-fw"></span>
       <span class="name">Sentry Mode</span>
       <span class="value">${ sentry ?
-        '<span class="zmdi zmdi-play-circle"></span> On' : 'Off'}
+        '<span class="zmdi zmdi-play-circle"></span> Enabled' : 'Disabled'}
       </span>
     </li>
   </ul>
