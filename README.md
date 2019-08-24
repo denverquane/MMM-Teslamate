@@ -1,6 +1,8 @@
 # MMM-Teslamate
 ## Magic Mirror Module for the Teslamate utility
 
+![Teslamate.png](./doc/MMM-Teslamate.png)
+
 Big thanks to [adriankumpf](https://github.com/adriankumpf) for their incredible work on the [Teslamate](https://github.com/adriankumpf/teslamate) project!
 
 If you have any feedback or suggestions, feel free to submit a MR with a feature, or log an issue for a feature you'd like to see!
@@ -43,7 +45,7 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
 * The "charge added" field is displayed in units of "Kw": is this correct?
 
 ## Ongoing work
-* Add images of module
+* ~~~Add images of module~~~
 * Add any new MQTT topics as they are added to Teslamate
 * Allow more customization of colors and text via config
 * Make more aspects of config customizable
