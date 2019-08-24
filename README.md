@@ -45,7 +45,7 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
 * The "charge added" field is displayed in units of "Kw": is this correct?
 
 ## Ongoing work
-* ~~~Add images of module~~~
+* ~~Add images of module~~
 * Add any new MQTT topics as they are added to Teslamate
 * Allow more customization of colors and text via config
 * Make more aspects of config customizable
@@ -53,4 +53,4 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
 * Selectively enable/disable certain fields based on other state (for example, still show scheduled charge time if plugged in)
 * Display Teslamate "status" topic
 * Format and display Teslamate "scheduled charge time" topic
-* ~~~Proper Imperial/Metric conversion and formatting~~~
+* ~~Proper Imperial/Metric conversion and formatting~~
