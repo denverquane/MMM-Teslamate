@@ -1,3 +1,20 @@
+//TODO I could not get these to be global and shared between this file and node_helper...
+const Topics = [
+  { topic: 'teslamate/cars/1/display_name' },
+  { topic: 'teslamate/cars/1/state' },
+  { topic: 'teslamate/cars/1/battery_level' },
+  { topic: 'teslamate/cars/1/ideal_battery_range_km' },
+  { topic: 'teslamate/cars/1/est_battery_range_km' },
+  { topic: 'teslamate/cars/1/plugged_in' },
+  { topic: 'teslamate/cars/1/charge_limit_soc' },
+  { topic: 'teslamate/cars/1/scheduled_charging_start_time' },
+  { topic: 'teslamate/cars/1/charge_energy_added' },
+  { topic: 'teslamate/cars/1/speed' },
+  { topic: 'teslamate/cars/1/outside_temp' },
+  { topic: 'teslamate/cars/1/inside_temp' },
+  { topic: 'teslamate/cars/1/locked' },
+  { topic: 'teslamate/cars/1/sentry_mode' },
+];
 
 Module.register("MMM-Teslamate", {
 
@@ -16,7 +33,10 @@ Module.register("MMM-Teslamate", {
 
   // Default module config
   defaults: {
-    mqttServers: []
+    mqttServer: {},
+    imperial: true,
+    batteryDanger: 30,
+    batteryWarning: 50, 
   },
 
   makeServerKey: function (server) {
@@ -25,39 +45,22 @@ Module.register("MMM-Teslamate", {
 
   start: function () {
     console.log(this.name + ' started.');
-    this.subscriptions = [
-      { topic: 'teslamate/cars/1/display_name' },
-      { topic: 'teslamate/cars/1/state' },
-      { topic: 'teslamate/cars/1/battery_level' },
-      { topic: 'teslamate/cars/1/ideal_battery_range_km' },
-      { topic: 'teslamate/cars/1/est_battery_range_km' },
-      { topic: 'teslamate/cars/1/plugged_in' },
-      { topic: 'teslamate/cars/1/charge_limit_soc' },
-      { topic: 'teslamate/cars/1/scheduled_charging_start_time' },
-      { topic: 'teslamate/cars/1/charge_energy_added' },
-      { topic: 'teslamate/cars/1/speed' },
-      { topic: 'teslamate/cars/1/outside_temp' },
-      { topic: 'teslamate/cars/1/inside_temp' },
-      { topic: 'teslamate/cars/1/locked' },
-      { topic: 'teslamate/cars/1/sentry_mode' },
-    ];
+    this.subscriptions = Topics;
 
-    console.log(this.name + ': Setting up connection to ' + this.config.mqttServers.length + ' servers');
+    console.log(this.name + ': Setting up connection to server');
 
-    for (i = 0; i < this.config.mqttServers.length; i++) {
-      var s = this.config.mqttServers[i]
-      var serverKey = this.makeServerKey(s);
-      console.log(this.name + ': Adding config for ' + s.address + ' port ' + s.port + ' user ' + s.user);
-      for (j = 0; j < this.subscriptions.length; j++) {
-        var sub = this.subscriptions[j];
-        console.log(sub);
-        this.subscriptions[j] = {
-          topic: sub.topic,
-          serverKey: serverKey,
-          value: null,
-          time: null
-        };
-      }
+    var s = this.config.mqttServer
+    var serverKey = this.makeServerKey(s);
+    console.log(this.name + ': Adding config for ' + s.address + ' port ' + s.port + ' user ' + s.user);
+    for (j = 0; j < this.subscriptions.length; j++) {
+      var sub = this.subscriptions[j];
+      console.log(sub);
+      this.subscriptions[j] = {
+        topic: sub.topic,
+        serverKey: serverKey,
+        value: null,
+        time: null
+      };
     }
 
     this.openMqttConnection();
@@ -92,31 +95,35 @@ Module.register("MMM-Teslamate", {
   },
 
   getDom: function () {
-    // TODO hook into config for imperial v. metric
     const wrapper = document.createElement('div');
+
+    //TODO These values are brittle, probably need a better way to check besides just using the explicit indices...
     const carName = this.subscriptions[0].value;
+    //TODO is this interesting to see displayed?
     const state = this.subscriptions[1].value;
     const battery = this.subscriptions[2].value;
-    const idealRange = (this.subscriptions[3].value / 1.609).toFixed(0);
-    const estRange = (this.subscriptions[4].value / 1.609).toFixed(0);
+    const idealRange = this.config.imperial ? this.subscriptions[3].value.toFixed(0) : (this.subscriptions[3].value / 1.609).toFixed(0);
+    const estRange = this.config.imperial ? this.subscriptions[4].value.toFixed(0) : (this.subscriptions[4].value / 1.609).toFixed(0);
     const pluggedIn = this.subscriptions[5].value;
     const chargeLimitSOC = this.subscriptions[6].value;
+
+    //TODO format this correctly
     const chargeStartTime = this.subscriptions[7].value
     const energyAdded = this.subscriptions[8].value;
-    const speed = (this.subscriptions[9].value / 1.609).toFixed(1);
-    const outside_temp = (this.subscriptions[10].value * 9 / 5 + 32).toFixed(1);
-    const inside_temp = (this.subscriptions[11].value * 9 / 5 + 32).toFixed(1);
+    const speed = this.config.imperial ? this.subscriptions[9].value.toFixed(1) : (this.subscriptions[9].value / 1.609).toFixed(1);
+    const outside_temp = this.config.imperial ? this.subscriptions[10].value.toFixed(1) : (this.subscriptions[10].value * 9 / 5 + 32).toFixed(1);
+    const inside_temp = this.config.imperial ? this.subscriptions[11].value.toFixed(1) : (this.subscriptions[11].value * 9 / 5 + 32).toFixed(1);
     const locked = this.subscriptions[12].value;
     const sentry = this.subscriptions[13].value;
 
     const getBatteryLevelClass = function (bl) {
-      if (bl < 30) {
+      if (bl < batteryDanger) {
         return 'danger';
       }
-      if (bl < 50) {
+      if (bl < batteryWarning) {
         return 'warning';
       }
-      if (bl >= 50) {
+      if (bl >= batteryWarning) {
         return 'ok';
       }
 
@@ -124,68 +131,76 @@ Module.register("MMM-Teslamate", {
     };
 
     wrapper.innerHTML = `
-      <h2 class="mqtt-title"><span class="zmdi zmdi-car zmdi-hc-2x icon"></span> ${carName}</h2>
-      <ul class="mattributes">
-        <li class="mattribute battery-level battery-level-${getBatteryLevelClass(
-      battery,
+    <h2 class="mqtt-title">
+    <span class="zmdi zmdi-car zmdi-hc-2x icon"></span> ${carName}</h2>
+  <ul class="mattributes">
+    <li class="mattribute battery-level battery-level-${getBatteryLevelClass(
+        battery,
+      )}">
+      <span class="icon zmdi zmdi-battery zmdi-hc-fw"></span>
+      <span class="name">Current Battery Level</span>
+      <span class="value">${battery}%</span>
+    </li>
+    <li class="mattribute battery-level battery-level-${getBatteryLevelClass(
+      chargeLimitSOC,
     )}">
-          <span class="icon zmdi zmdi-battery zmdi-hc-fw"></span>
-          <span class="name">Current Battery / Max</span>
-          <span class="value">${battery} / ${chargeLimitSOC}%</span>
-        </li>
-        <li class="mattribute">
-          <span class="icon zmdi zmdi-car zmdi-hc-fw"></span>
-          <span class="name">Ideal/Estimated Ranges</span>
-          <span class="value">${idealRange}/${estRange} Mi</span>
-        </li>
-        ${pluggedIn ? `
-        <li class="mattribute">
-        <span class="icon zmdi zmdi-input-power zmdi-hc-fw"></span>
-        <span class="name">Charge Added</span>
-        <span class="value">${energyAdded} kW</span>
-      </li>`: ``}
-        ${speed > 0.0 ? `
-        <li class="mattribute">
+    <span class="icon zmdi zmdi-battery zmdi-hc-fw"></span>
+    <span class="name">Max Battery Level</span>
+    <span class="value">${chargeLimitSOC}%</span>
+  </li>
+    <li class="mattribute">
+      <span class="icon zmdi zmdi-car zmdi-hc-fw"></span>
+      <span class="name">Ideal v. Est. Range</span>
+      <span class="value">${idealRange} v. ${estRange} ${this.config.imperial ? `Km/h` : `Mi/h`}</span>
+    </li>
+    ${pluggedIn ? `
+    <li class="mattribute">
+      <span class="icon zmdi zmdi-input-power zmdi-hc-fw"></span>
+      <span class="name">Charge Added</span>
+      <span class="value">${energyAdded} kW</span>
+    </li>`: ``} ${speed > 0.0 ? `
+    <li class="mattribute">
       <span class="icon zmdi zmdi-traffic zmdi-hc-fw"></span>
       <span class="name">Speed</span>
-      <span class="value">${speed} Mph</span>
+      <span class="value">${speed} ${this.config.imperial ? `Km/h` : `Mi/h`}</span>
     </li>
     ` : ``}
-
-        <li class="mattribute">
-          <span class="icon zmdi zmdi-cloud-outline-alt zmdi-hc-fw"></span>
-          <span class="name">Inside</span>
-          <span class="value">${inside_temp}&deg;F</span>
-        </li>
-        <li class="mattribute">
-          <span class="icon zmdi zmdi-cloud-outline zmdi-hc-fw"></span>
-          <span class="name">Outside</span>
-          <span class="value">${outside_temp}&deg;F</span>
-        </li>
-	<li class="mattribute sentry-mode ${
+    <li class="mattribute">
+      <span class="icon zmdi zmdi-cloud-outline-alt zmdi-hc-fw"></span>
+      <span class="name">Inside</span>
+      <span class="value">${inside_temp}&deg;${this.config.imperial ? `C` : `F`}</span>
+    </li>
+    <li class="mattribute">
+      <span class="icon zmdi zmdi-cloud-outline zmdi-hc-fw"></span>
+      <span class="name">Outside</span>
+      <span class="value">${outside_temp}&deg;${this.config.imperial ? `C` : `F`}</span>
+    </li>
+    <li class="mattribute sentry-mode ${
       locked ? 'sentry-mode-active' : ''
       }">
-          <span class="icon zmdi zmdi-lock zmdi-hc-fw"></span>
-          <span class="name">Lock</span>
-          <span class="value">${
-      locked
-        ? '<span class="zmdi zmdi-lock"></span> Locked'
-        : '<span class="zmdi zmdi-lock-open"></span> Unlocked'
-      }</span>
-        </li>
-        <li class="mattribute sentry-mode ${
+      <span class="icon zmdi zmdi-lock zmdi-hc-fw"></span>
+      <span class="name">Lock</span>
+      <span class="value">${ locked ?
+        '<span class="zmdi zmdi-lock"></span> Locked' :
+        '<span class="zmdi zmdi-lock-open"></span> Unlocked'}
+      </span>
+    </li>
+    <li class="mattribute sentry-mode ${
       sentry ? 'sentry-mode-active' : ''
       }">
-          <span class="icon zmdi zmdi-shield-security zmdi-hc-fw"></span>
-          <span class="name">Sentry Mode</span>
-          <span class="value">${
-      sentry
-        ? '<span class="zmdi zmdi-play-circle"></span> On'
-        : 'Off'
-      }</span>
-        </li>
-		  </ul>
+      <span class="icon zmdi zmdi-shield-security zmdi-hc-fw"></span>
+      <span class="name">Sentry Mode</span>
+      <span class="value">${ sentry ?
+        '<span class="zmdi zmdi-play-circle"></span> Enabled' : 'Disabled'}
+      </span>
+    </li>
+  </ul>
 		`;
     return wrapper;
   }
 });
+
+module.exports = {
+    ALL_MQTT_TOPICS: ALL_MQTT_TOPICS
+};
+
