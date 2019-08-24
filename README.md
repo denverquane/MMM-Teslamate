@@ -1,7 +1,7 @@
 # MMM-Teslamate
 ## Magic Mirror Module for the Teslamate utility
 
-![Teslamate.png](./doc/MMM-Teslamate.png)
+![Teslamate.png](doc/MMM-Teslamate.PNG)
 
 Big thanks to [adriankumpf](https://github.com/adriankumpf) for their incredible work on the [Teslamate](https://github.com/adriankumpf/teslamate) project!
 
