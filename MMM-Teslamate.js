@@ -2,18 +2,36 @@
 const Topics = [
   { topic: 'teslamate/cars/1/display_name' },
   { topic: 'teslamate/cars/1/state' },
-  { topic: 'teslamate/cars/1/battery_level' },
-  { topic: 'teslamate/cars/1/ideal_battery_range_km' },
-  { topic: 'teslamate/cars/1/est_battery_range_km' },
-  { topic: 'teslamate/cars/1/plugged_in' },
-  { topic: 'teslamate/cars/1/charge_limit_soc' },
-  { topic: 'teslamate/cars/1/scheduled_charging_start_time' },
-  { topic: 'teslamate/cars/1/charge_energy_added' },
+  { topic: 'teslamate/cars/1/healthy' },
+
+  { topic: 'teslamate/cars/1/latitude' },
+  { topic: 'teslamate/cars/1/longitude' },
+  { topic: 'teslamate/cars/1/shift_state' },
   { topic: 'teslamate/cars/1/speed' },
-  { topic: 'teslamate/cars/1/outside_temp' },
-  { topic: 'teslamate/cars/1/inside_temp' },
+
   { topic: 'teslamate/cars/1/locked' },
   { topic: 'teslamate/cars/1/sentry_mode' },
+  { topic: 'teslamate/cars/1/windows_open' },
+
+  { topic: 'teslamate/cars/1/outside_temp' },
+  { topic: 'teslamate/cars/1/inside_temp' },
+
+  { topic: 'teslamate/cars/1/odometer' },
+  { topic: 'teslamate/cars/1/ideal_battery_range_km' },
+  { topic: 'teslamate/cars/1/est_battery_range_km' },
+  { topic: 'teslamate/cars/1/rated_battery_range_km' },
+
+  { topic: 'teslamate/cars/1/battery_level' },
+  { topic: 'teslamate/cars/1/plugged_in' },
+  { topic: 'teslamate/cars/1/charge_energy_added' },
+  { topic: 'teslamate/cars/1/charge_limit_soc' },
+  { topic: 'teslamate/cars/1/charge_port_door_open' },
+  { topic: 'teslamate/cars/1/charger_actual_current' },
+  { topic: 'teslamate/cars/1/charger_phases' },
+  { topic: 'teslamate/cars/1/charger_power' },
+  { topic: 'teslamate/cars/1/charger_voltage' },
+  { topic: 'teslamate/cars/1/scheduled_charging_start_time' },
+  { topic: 'teslamate/cars/1/time_to_full_charge' },
 ];
 
 Module.register("MMM-Teslamate", {
@@ -37,6 +55,8 @@ Module.register("MMM-Teslamate", {
     imperial: false,
     batteryDanger: 30,
     batteryWarning: 50,
+    gMapsApiKey: "",
+    mapZoomLevel: 10,
   },
 
   makeServerKey: function (server) {
@@ -101,30 +121,39 @@ Module.register("MMM-Teslamate", {
     const carName = this.subscriptions[0].value;
     //TODO is this interesting to see displayed?
     const state = this.subscriptions[1].value;
-    const battery = this.subscriptions[2].value;
-    const idealRange = this.subscriptions[3].value ? (!this.config.imperial ?
-	(this.subscriptions[3].value * 1.0).toFixed(0) :
-	(this.subscriptions[3].value / 1.609).toFixed(0)) : 0;
-    const estRange = this.subscriptions[4].value ? (!this.config.imperial ?
-	(this.subscriptions[4].value * 1.0).toFixed(0) :
-	(this.subscriptions[4].value / 1.609).toFixed(0)) : 0;
-    const pluggedIn = this.subscriptions[5].value;
-    const chargeLimitSOC = this.subscriptions[6].value;
+    const latitude = this.subscriptions[3].value;
+    const longitude = this.subscriptions[4].value;
+    const battery = this.subscriptions[16].value;
+    const idealRange = this.subscriptions[13].value ? (!this.config.imperial ?
+	(this.subscriptions[13].value * 1.0).toFixed(0) :
+  (this.subscriptions[13].value / 1.609).toFixed(0)) : 0;
+
+    const estRange = this.subscriptions[14].value ? (!this.config.imperial ?
+	(this.subscriptions[14].value * 1.0).toFixed(0) :
+  (this.subscriptions[14].value / 1.609).toFixed(0)) : 0;
+
+    const pluggedIn = this.subscriptions[17].value;
+    const chargeLimitSOC = this.subscriptions[19].value;
 
     //TODO format this correctly
-    const chargeStartTime = this.subscriptions[7].value;
-    const energyAdded = this.subscriptions[8].value;
-    const speed = this.subscriptions[9].value ? (!this.config.imperial ?
-	(this.subscriptions[9].value * 1.0).toFixed(1) :
-	(this.subscriptions[9].value / 1.609).toFixed(1)) : 0;
+    const chargeStartTime = this.subscriptions[25].value;
+    const timeToFull = this.subscriptions[26].value;
+    const energyAdded = this.subscriptions[18].value;
+    const speed = this.subscriptions[6].value ? (!this.config.imperial ?
+	(this.subscriptions[6].value * 1.0).toFixed(1) :
+	(this.subscriptions[6].value / 1.609).toFixed(1)) : 0;
     const outside_temp = this.subscriptions[10].value ? (!this.config.imperial ? 
 	(this.subscriptions[10].value * 1.0).toFixed(1) :
 	(this.subscriptions[10].value * 9 / 5 + 32).toFixed(1)) : 0;
     const inside_temp = this.subscriptions[11].value ? (!this.config.imperial ?
 	(this.subscriptions[11].value * 1.0).toFixed(1) :
-	(this.subscriptions[11].value * 9 / 5 + 32).toFixed(1)) : 0;
-    const locked = this.subscriptions[12].value;
-    const sentry = this.subscriptions[13].value;
+  (this.subscriptions[11].value * 9 / 5 + 32).toFixed(1)) : 0;
+
+    const odometer = this.subscriptions[12].value ? (!this.config.imperial ?
+      (this.subscriptions[12].value * 1.0).toFixed(1) :
+      (this.subscriptions[12].value / 1.609).toFixed(0)) : 0;
+    const locked = this.subscriptions[7].value;
+    const sentry = this.subscriptions[8].value;
 
     const getBatteryLevelClass = function (bl, warn, danger) {
       if (bl < danger) {
@@ -139,7 +168,7 @@ Module.register("MMM-Teslamate", {
 
       return '';
     };
-
+    const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
     wrapper.innerHTML = `
     <h2 class="mqtt-title">
     <span class="zmdi zmdi-car zmdi-hc-2x icon"></span> ${carName}</h2>
@@ -167,24 +196,14 @@ Module.register("MMM-Teslamate", {
     <li class="mattribute">
       <span class="icon zmdi zmdi-input-power zmdi-hc-fw"></span>
       <span class="name">Charge Added</span>
-      <span class="value">${energyAdded} kW</span>
-    </li>`: ``} ${speed > 0.0 ? `
-    <li class="mattribute">
-      <span class="icon zmdi zmdi-traffic zmdi-hc-fw"></span>
-      <span class="name">Speed</span>
-      <span class="value">${speed} ${!this.config.imperial ? `Km/h` : `Mi/h`}</span>
-    </li>
-    ` : ``}
-    <li class="mattribute">
-      <span class="icon zmdi zmdi-cloud-outline-alt zmdi-hc-fw"></span>
-      <span class="name">Inside</span>
-      <span class="value">${inside_temp}&deg;${!this.config.imperial ? `C` : `F`}</span>
+      <span class="value">${energyAdded} kWh</span>
     </li>
     <li class="mattribute">
-      <span class="icon zmdi zmdi-cloud-outline zmdi-hc-fw"></span>
-      <span class="name">Outside</span>
-      <span class="value">${outside_temp}&deg;${!this.config.imperial ? `C` : `F`}</span>
+      <span class="icon zmdi zmdi-time zmdi-hc-fw"></span>
+      <span class="name">Time to Full Charge</span>
+      <span class="value">${timeToFull} Hours</span>
     </li>
+    `: ``} 
     <li class="mattribute sentry-mode ${
       locked ? 'sentry-mode-active' : ''
       }">
@@ -204,6 +223,14 @@ Module.register("MMM-Teslamate", {
         '<span class="zmdi zmdi-play-circle"></span> Enabled' : 'Disabled'}
       </span>
     </li>
+    <li class="mattribute">
+      <span class="icon zmdi zmdi-dot-circle-alt zmdi-hc-fw"></span>
+      <span class="name">Odometer</span>
+      <span class="value">${odometer} ${!this.config.imperial ? `Km` : `Mi`}</s$
+    </li>
+    ${this.config.gMapsApiKey !== "" ? `<li class="mattribute">
+	<iframe style="border:0" width=400 height=300 src=${gUrl}></iframe>
+    </li>` : ``}
   </ul>
 		`;
     return wrapper;

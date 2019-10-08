@@ -3,7 +3,8 @@
 
 ![Teslamate.png](doc/MMM-Teslamate.PNG)
 
-Big thanks to [adriankumpf](https://github.com/adriankumpf) for their incredible work on the [Teslamate](https://github.com/adriankumpf/teslamate) project!
+Big thanks to [adriankumpf](https://github.com/adriankumpf) for their incredible work on the [Teslamate](https://github.com/adriankumpf/teslamate) project,
+as well as [aduyng](https://github.com/aduyng) for their [TeslaStatus](https://github.com/aduyng/MMM-TeslaStatus) module used as a template!
 
 If you have any feedback or suggestions, feel free to submit a MR with a feature, or log an issue for a feature you'd like to see!
 
@@ -36,13 +37,16 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
         batteryDanger: 30, //below this value, battery levels are red
         batteryWarning: 50, //below this value, battery levels are yellow
         //above the warning value, battery levels are green
+	gMapsApiKey: "AIz...", //optional
+        mapZoomLevel: 12
     }
 },
 ```
 
+You can obtain a Google Maps API key from [here](https://cloud.google.com/maps-platform/#get-started), but if no key is provided then the map iframe is disabled (to force the map to not display, simply omit or comment out your API key).
+
 ## Notes
-* The "charge added" field is currently only enabled if the vehicle is plugged in
-* The "charge added" field is displayed in units of "Kw": is this correct?
+* Some fields (charge added, time to full charge) are currently only enabled if the vehicle is plugged in
 
 ## Ongoing work
 * ~~Add images of module~~

@@ -1,20 +1,38 @@
 var mqtt = require('mqtt');
 var NodeHelper = require("node_helper");
 const Topics = [
-  { topic: 'teslamate/cars/1/display_name' },
-  { topic: 'teslamate/cars/1/state' },
-  { topic: 'teslamate/cars/1/battery_level' },
-  { topic: 'teslamate/cars/1/ideal_battery_range_km' },
-  { topic: 'teslamate/cars/1/est_battery_range_km' },
-  { topic: 'teslamate/cars/1/plugged_in' },
-  { topic: 'teslamate/cars/1/charge_limit_soc' },
-  { topic: 'teslamate/cars/1/scheduled_charging_start_time' },
-  { topic: 'teslamate/cars/1/charge_energy_added' },
-  { topic: 'teslamate/cars/1/speed' },
-  { topic: 'teslamate/cars/1/outside_temp' },
-  { topic: 'teslamate/cars/1/inside_temp' },
-  { topic: 'teslamate/cars/1/locked' },
-  { topic: 'teslamate/cars/1/sentry_mode' },
+    { topic: 'teslamate/cars/1/display_name' },
+    { topic: 'teslamate/cars/1/state' },
+    { topic: 'teslamate/cars/1/healthy' },
+  
+    { topic: 'teslamate/cars/1/latitude' },
+    { topic: 'teslamate/cars/1/longitude' },
+    { topic: 'teslamate/cars/1/shift_state' },
+    { topic: 'teslamate/cars/1/speed' },
+  
+    { topic: 'teslamate/cars/1/locked' },
+    { topic: 'teslamate/cars/1/sentry_mode' },
+    { topic: 'teslamate/cars/1/windows_open' },
+  
+    { topic: 'teslamate/cars/1/outside_temp' },
+    { topic: 'teslamate/cars/1/inside_temp' },
+  
+    { topic: 'teslamate/cars/1/odometer' },
+    { topic: 'teslamate/cars/1/ideal_battery_range_km' },
+    { topic: 'teslamate/cars/1/est_battery_range_km' },
+    { topic: 'teslamate/cars/1/rated_battery_range_km' },
+  
+    { topic: 'teslamate/cars/1/battery_level' },
+    { topic: 'teslamate/cars/1/plugged_in' },
+    { topic: 'teslamate/cars/1/charge_energy_added' },
+    { topic: 'teslamate/cars/1/charge_limit_soc' },
+    { topic: 'teslamate/cars/1/charge_port_door_open' },
+    { topic: 'teslamate/cars/1/charger_actual_current' },
+    { topic: 'teslamate/cars/1/charger_phases' },
+    { topic: 'teslamate/cars/1/charger_power' },
+    { topic: 'teslamate/cars/1/charger_voltage' },
+    { topic: 'teslamate/cars/1/scheduled_charging_start_time' },
+    { topic: 'teslamate/cars/1/time_to_full_charge' },
 ];
 
 var globalServer = {};
