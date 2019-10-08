@@ -55,6 +55,8 @@ Module.register("MMM-Teslamate", {
     imperial: false,
     batteryDanger: 30,
     batteryWarning: 50,
+    gMapsApiKey: "",
+    mapZoomLevel: 10,
   },
 
   makeServerKey: function (server) {
@@ -119,15 +121,17 @@ Module.register("MMM-Teslamate", {
     const carName = this.subscriptions[0].value;
     //TODO is this interesting to see displayed?
     const state = this.subscriptions[1].value;
-    const battery = this.subscriptions[13].value;
+    const latitude = this.subscriptions[3].value;
+    const longitude = this.subscriptions[4].value;
+    const battery = this.subscriptions[16].value;
     const idealRange = this.subscriptions[13].value ? (!this.config.imperial ?
 	(this.subscriptions[13].value * 1.0).toFixed(0) :
   (this.subscriptions[13].value / 1.609).toFixed(0)) : 0;
-  
+
     const estRange = this.subscriptions[14].value ? (!this.config.imperial ?
 	(this.subscriptions[14].value * 1.0).toFixed(0) :
   (this.subscriptions[14].value / 1.609).toFixed(0)) : 0;
-  
+
     const pluggedIn = this.subscriptions[17].value;
     const chargeLimitSOC = this.subscriptions[19].value;
 
@@ -145,9 +149,9 @@ Module.register("MMM-Teslamate", {
 	(this.subscriptions[11].value * 1.0).toFixed(1) :
   (this.subscriptions[11].value * 9 / 5 + 32).toFixed(1)) : 0;
 
-    const odometer = this.subscriptions[12].value ? (!this.config.imperial ? 
+    const odometer = this.subscriptions[12].value ? (!this.config.imperial ?
       (this.subscriptions[12].value * 1.0).toFixed(1) :
-      (this.subscriptions[12].value * 9 / 5 + 32).toFixed(1)) : 0;
+      (this.subscriptions[12].value / 1.609).toFixed(0)) : 0;
     const locked = this.subscriptions[7].value;
     const sentry = this.subscriptions[8].value;
 
@@ -164,7 +168,7 @@ Module.register("MMM-Teslamate", {
 
       return '';
     };
-
+    const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
     wrapper.innerHTML = `
     <h2 class="mqtt-title">
     <span class="zmdi zmdi-car zmdi-hc-2x icon"></span> ${carName}</h2>
@@ -188,21 +192,16 @@ Module.register("MMM-Teslamate", {
       <span class="name">Ideal v. Est. Range</span>
       <span class="value">${idealRange} v. ${estRange} ${!this.config.imperial ? `Km` : `Mi`}</span>
     </li>
-    <li class="mattribute">
-      <span class="icon zmdi zmdi-dot-circle-alt zmdi-hc-fw"></span>
-      <span class="name">Odometer</span>
-      <span class="value">${odometer} ${!this.config.imperial ? `Km` : `Mi`}</span>
-    </li>
     ${pluggedIn ? `
     <li class="mattribute">
       <span class="icon zmdi zmdi-input-power zmdi-hc-fw"></span>
       <span class="name">Charge Added</span>
-      <span class="value">${energyAdded} kW</span>
+      <span class="value">${energyAdded} kWh</span>
     </li>
     <li class="mattribute">
       <span class="icon zmdi zmdi-time zmdi-hc-fw"></span>
       <span class="name">Time to Full Charge</span>
-      <span class="value">${timeToFull} kW</span>
+      <span class="value">${timeToFull} Hours</span>
     </li>
     `: ``} 
     <li class="mattribute sentry-mode ${
@@ -224,6 +223,14 @@ Module.register("MMM-Teslamate", {
         '<span class="zmdi zmdi-play-circle"></span> Enabled' : 'Disabled'}
       </span>
     </li>
+    <li class="mattribute">
+      <span class="icon zmdi zmdi-dot-circle-alt zmdi-hc-fw"></span>
+      <span class="name">Odometer</span>
+      <span class="value">${odometer} ${!this.config.imperial ? `Km` : `Mi`}</s$
+    </li>
+    ${this.config.gMapsApiKey !== "" ? `<li class="mattribute">
+	<iframe style="border:0" width=400 height=300 src=${gUrl}></iframe>
+    </li>` : ``}
   </ul>
 		`;
     return wrapper;

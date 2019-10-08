@@ -3,7 +3,8 @@
 
 ![Teslamate.png](doc/MMM-Teslamate.PNG)
 
-Big thanks to [adriankumpf](https://github.com/adriankumpf) for their incredible work on the [Teslamate](https://github.com/adriankumpf/teslamate) project!
+Big thanks to [adriankumpf](https://github.com/adriankumpf) for their incredible work on the [Teslamate](https://github.com/adriankumpf/teslamate) project,
+as well as [aduyng](https://github.com/aduyng) for their [TeslaStatus](https://github.com/aduyng/MMM-TeslaStatus) module used as a template!
 
 If you have any feedback or suggestions, feel free to submit a MR with a feature, or log an issue for a feature you'd like to see!
 
