@@ -65,7 +65,10 @@ Module.register("MMM-Teslamate", {
 
   start: function () {
     console.log(this.name + ' started.');
-    this.subscriptions = {};
+    this.subscriptions = {
+      lat: {},
+      lon: {},
+    };
 
     console.log(this.name + ': Setting up connection to server');
 
@@ -88,7 +91,8 @@ Module.register("MMM-Teslamate", {
     var self = this;
     setInterval(function () {
       self.updateDom(100);
-    }, 5000);
+    }, 300000); //every 5 minutes
+
   },
 
   openMqttConnection: function () {
@@ -98,17 +102,25 @@ Module.register("MMM-Teslamate", {
   socketNotificationReceived: function (notification, payload) {
     if (notification === 'MQTT_PAYLOAD') {
       if (payload != null) {
-        for (let key in this.subscriptions) {
+        var updatedImportant = false;
+	for (let key in this.subscriptions) {
           sub = this.subscriptions[key];
           console.log(sub);
           if (sub.serverKey == payload.serverKey && sub.topic == payload.topic) {
             var value = payload.value;
             sub.value = value;
             sub.time = payload.time;
+
+	    if ((key === "lat" || key === "lon") && sub.value.toFixed(4) !== this.subscriptions.value.toFixed(4)) {
+		console.log("Updated important");
+		updatedImportant = true;
+	    }
             this.subscriptions[key] = sub;
           }
         }
-        this.updateDom();
+	if (updatedImportant) {
+	  this.updateDom();
+	}
       } else {
         console.log(this.name + ': MQTT_PAYLOAD - No payload');
       }
@@ -131,11 +143,11 @@ Module.register("MMM-Teslamate", {
     const latitude = this.subscriptions["lat"].value;
     const longitude = this.subscriptions["lon"].value;
     const battery = this.subscriptions["battery"].value;
-    const pluggedIn = this.subscriptions["plugged_in"].value;
     const chargeLimitSOC = this.subscriptions["charge_limit"].value;
     //TODO format this correctly
     const chargeStart = this.subscriptions["charge_start"].value;
     const timeToFull = this.subscriptions["charge_time"].value;
+    const pluggedIn = this.subscriptions["plugged_in"].value && timeToFull > 0.0;
     const energyAdded = this.subscriptions["charge_added"].value;
     const locked = this.subscriptions["locked"].value;
     const sentry = this.subscriptions["sentry"].value;
@@ -259,6 +271,13 @@ Module.register("MMM-Teslamate", {
       attrList.appendChild(timeToFullLi);
     }
 
+    var odometerLi = document.createElement("li");
+    odometerLi.className = "mattribute";
+    odometerLi.appendChild(makeSpan("icon zmdi zmdi-dot-circle-alt zmdi-hc-fw", ""));
+    odometerLi.appendChild(makeSpan("name", "Odometer"));
+    odometerLi.appendChild(makeSpan("value", odometer + (!this.config.imperial ? " Km" : " Mi")));
+
+    attrList.appendChild(odometerLi);
     wrapper.appendChild(attrList);
   //   <li class="mattribute sentry-mode ${
   //     locked ? 'sentry-mode-active' : ''
@@ -279,14 +298,6 @@ Module.register("MMM-Teslamate", {
   //       '<span class="zmdi zmdi-play-circle"></span> Enabled' : 'Disabled'}
   //     </span>
   //   </li>
-  //   <li class="mattribute">
-  //     <span class="icon zmdi zmdi-dot-circle-alt zmdi-hc-fw"></span>
-  //     <span class="name">Odometer</span>
-  //     <span class="value">${odometer} ${!this.config.imperial ? `Km` : `Mi`}</s$
-  //   </li>
-  //   ${this.config.gMapsApiKey !== "" ? `<li class="mattribute">
-	// <iframe style="border:0" width=400 height=300 src=${gUrl}></iframe>
-  //   </li>` : ``}
   // </ul>
 	// 	`;
     return wrapper;
