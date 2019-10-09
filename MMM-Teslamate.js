@@ -115,19 +115,15 @@ Module.register("MMM-Teslamate", {
     }
   },
 
-  
-
   getDom: function () {
     const kmToMiFixed = function (miles, fixed) {
       return (miles / 1.609).toFixed(fixed);
     };
-  
+
     const cToFFixed = function (celcius, fixed) {
       return ((celcius * 9/5) + 32).toFixed(fixed);
     };
-
     const wrapper = document.createElement('div');
-    const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
 
     const carName = this.subscriptions["name"].value;
     //TODO is this interesting to see displayed?
@@ -143,6 +139,8 @@ Module.register("MMM-Teslamate", {
     const energyAdded = this.subscriptions["charge_added"].value;
     const locked = this.subscriptions["locked"].value;
     const sentry = this.subscriptions["sentry"].value;
+
+    const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
 
     var idealRange = this.subscriptions["ideal_range"].value ? this.subscriptions["ideal_range"].value : 0;
     var estRange = this.subscriptions["est_range"].value ? this.subscriptions["est_range"].value : 0;
@@ -192,72 +190,76 @@ Module.register("MMM-Teslamate", {
 
     var title = document.createElement("h2");
     title.className = "mqtt-title";
-    var nameSpan = document.createElement("span");
+    var iconSpan = document.createElement("span");
 
     //TODO does this need to be "classlist"?
-    nameSpan.className = "zmdi zmdi-car zmdi-hc-2x icon"
-    nameSpan.innerHTML = carName;
-    title.appendChild(nameSpan)
-    wrapper.appendChild(title);  
-    
+    iconSpan.className = "zmdi zmdi-car zmdi-hc-2x icon"
+    title.innerHTML = carName;
+    title.prepend(iconSpan);
+    if (pluggedIn) {
+      var chargeIconSpan = document.createElement("span");
+      chargeIconSpan.className = "zmdi zmdi-input-power zmdi-hc-1x charge-icon";
+      title.appendChild(chargeIconSpan);
+    }
+
+    wrapper.appendChild(title);
+
     var attrList = document.createElement("ul");
     attrList.className = "mattributes";
+    if (this.config.gMapsApiKey !== "") {
+      var gmapLi = document.createElement("li");
+      gmapLi.className = "mattribute";
+      var iframe = document.createElement("iframe");
+      iframe.setAttribute("style", "border:0");
+      iframe.setAttribute("width", 400);
+      iframe.setAttribute("height", 300);
+      iframe.setAttribute("src", gUrl);
+      gmapLi.appendChild(iframe);
+      attrList.appendChild(gmapLi);
+    }
+
     var batteryLi = document.createElement("li");
     batteryLi.className = "mattribute battery-level battery-level-" 
       + getBatteryLevelClass(battery, this.config.batteryWarning, this.config.batteryDanger);
     batteryLi.appendChild(makeSpan("icon zmdi zmdi-battery zmdi-hc-fw", ""));
-    batteryLi.appendChild(makeSpan("name", "Current Battery Level"));
+    batteryLi.appendChild(makeSpan("name", "Current Battery"));
     batteryLi.appendChild(makeSpan("value", battery + "%"));
 
     var maxBatteryLi = document.createElement("li");
     maxBatteryLi.className = "mattribute battery-level battery-level-" 
       + getBatteryLevelClass(chargeLimitSOC, this.config.batteryWarning, this.config.batteryDanger);
     maxBatteryLi.appendChild(makeSpan("icon zmdi zmdi-battery zmdi-hc-fw", ""));
-    maxBatteryLi.appendChild(makeSpan("name", "Max Battery Level"));
+    maxBatteryLi.appendChild(makeSpan("name", "Max Battery"));
     maxBatteryLi.appendChild(makeSpan("value", chargeLimitSOC + "%"));
 
+    var rangeCompare = document.createElement("li");
+    rangeCompare.className = "mattribute";
+    rangeCompare.appendChild(makeSpan("icon zmdi zmdi-car zmdi-hc-fw", ""));
+//    rangeCompare.appendChild(makeSpan("name", "Ideal v. Est. Range"));
+    rangeCompare.appendChild(makeSpan("name", "Ideal Range"));
+    rangeCompare.appendChild(makeSpan("value", idealRange + (!this.config.imperial ? " Km" : " Mi")));
 
-    
     attrList.appendChild(batteryLi)
     attrList.appendChild(maxBatteryLi);
+    attrList.appendChild(rangeCompare);
+
+    if (pluggedIn) {
+      var energyAddedLi = document.createElement("li");
+      energyAddedLi.className = "mattribute";
+      energyAddedLi.appendChild(makeSpan("icon zmdi zmdi-input-power zmdi-hc-fw", ""));
+      energyAddedLi.appendChild(makeSpan("name", "Charge Added"));
+      energyAddedLi.appendChild(makeSpan("value", energyAdded + " kWh"));
+
+      var timeToFullLi =  document.createElement("li");
+      timeToFullLi.className = "mattribute";
+      timeToFullLi.appendChild(makeSpan("icon zmdi zmdi-time zmdi-hc-fw", ""));
+      timeToFullLi.appendChild(makeSpan("name", "Time to " + chargeLimitSOC + "%"));
+      timeToFullLi.appendChild(makeSpan("value", timeToFull + " Hours"));
+      attrList.appendChild(energyAddedLi);
+      attrList.appendChild(timeToFullLi);
+    }
 
     wrapper.appendChild(attrList);
-
-  //   wrapper.innerHTML = `
-  //   <h2 class="mqtt-title">
-  //   <span class="zmdi zmdi-car zmdi-hc-2x icon"></span> ${carName}</h2>
-  // <ul class="mattributes">
-  //   <li class="mattribute battery-level battery-level-${getBatteryLevelClass(
-  //       battery, this.config.batteryWarning, this.config.batteryDanger
-  //     )}">
-  //     <span class="icon zmdi zmdi-battery zmdi-hc-fw"></span>
-  //     <span class="name">Current Battery Level</span>
-  //     <span class="value">${battery}%</span>
-  //   </li>
-  //   <li class="mattribute battery-level battery-level-${getBatteryLevelClass(
-  //     chargeLimitSOC, this.config.batteryWarning, this.config.batteryDanger
-  //   )}">
-  //   <span class="icon zmdi zmdi-battery zmdi-hc-fw"></span>
-  //   <span class="name">Max Battery Level</span>
-  //   <span class="value">${chargeLimitSOC}%</span>
-  // </li>
-  //   <li class="mattribute">
-  //     <span class="icon zmdi zmdi-car zmdi-hc-fw"></span>
-  //     <span class="name">Ideal v. Est. Range</span>
-  //     <span class="value">${idealRange} v. ${estRange} ${!this.config.imperial ? `Km` : `Mi`}</span>
-  //   </li>
-  //   ${pluggedIn ? `
-  //   <li class="mattribute">
-  //     <span class="icon zmdi zmdi-input-power zmdi-hc-fw"></span>
-  //     <span class="name">Charge Added</span>
-  //     <span class="value">${energyAdded} kWh</span>
-  //   </li>
-  //   <li class="mattribute">
-  //     <span class="icon zmdi zmdi-time zmdi-hc-fw"></span>
-  //     <span class="name">Time to Full Charge</span>
-  //     <span class="value">${timeToFull} Hours</span>
-  //   </li>
-  //   `: ``} 
   //   <li class="mattribute sentry-mode ${
   //     locked ? 'sentry-mode-active' : ''
   //     }">

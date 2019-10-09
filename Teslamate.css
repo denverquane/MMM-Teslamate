@@ -14,6 +14,12 @@
 
 .mqtt-title .icon {
   color: lightcoral;
+  padding-right: 5px;
+}
+
+.mqtt-title .charge-icon {
+  color: lightgreen;
+  float: right;
 }
 
 .mattributes {
@@ -48,4 +54,9 @@
 
 .mattributes .mattribute .name:after {
   content: ': ';
+  padding-right: 50px;
+}
+
+.mattributes .mattribute .value {
+  float: right;
 }
