@@ -89,9 +89,9 @@ Module.register("MMM-Teslamate", {
 
     this.openMqttConnection();
     var self = this;
-    setInterval(function () {
-      self.updateDom(100);
-    }, 300000); //every 5 minutes
+//    setInterval(function () {
+//      self.updateDom(100);
+//    }, 300000); //every 5 minutes
 
   },
 
@@ -102,7 +102,7 @@ Module.register("MMM-Teslamate", {
   socketNotificationReceived: function (notification, payload) {
     if (notification === 'MQTT_PAYLOAD') {
       if (payload != null) {
-        var updatedImportant = false;
+        //var updatedImportant = false;
 	for (let key in this.subscriptions) {
           sub = this.subscriptions[key];
           console.log(sub);
@@ -111,16 +111,16 @@ Module.register("MMM-Teslamate", {
             sub.value = value;
             sub.time = payload.time;
 
-	    if ((key === "lat" || key === "lon") && sub.value.toFixed(4) !== this.subscriptions.value.toFixed(4)) {
-		console.log("Updated important");
-		updatedImportant = true;
-	    }
+//	    if ((key === "lat" || key === "lon") && sub.value.toFixed(4) !== this.subscriptions.value.toFixed(4)) {
+//		console.log("Updated important");
+//		updatedImportant = true;
+//	    }
             this.subscriptions[key] = sub;
           }
         }
-	if (updatedImportant) {
-	  this.updateDom();
-	}
+//	if (updatedImportant) {
+//	  this.updateDom();
+//	}
       } else {
         console.log(this.name + ': MQTT_PAYLOAD - No payload');
       }
@@ -208,11 +208,11 @@ Module.register("MMM-Teslamate", {
     iconSpan.className = "zmdi zmdi-car zmdi-hc-2x icon"
     title.innerHTML = carName;
     title.prepend(iconSpan);
-    if (pluggedIn) {
-      var chargeIconSpan = document.createElement("span");
-      chargeIconSpan.className = "zmdi zmdi-input-power zmdi-hc-1x charge-icon";
-      title.appendChild(chargeIconSpan);
-    }
+    //if (!pluggedIn) {
+    //  var chargeIconSpan = document.createElement("span");
+    //  chargeIconSpan.className = "zmdi zmdi-input-power zmdi-hc-1x charge-icon";
+    //  title.appendChild(chargeIconSpan);
+    //}
 
     wrapper.appendChild(title);
 
