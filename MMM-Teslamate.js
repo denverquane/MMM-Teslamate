@@ -119,7 +119,7 @@ Module.register("MMM-Teslamate", {
           }
         }
 //	if (updatedImportant) {
-//	  this.updateDom();
+	  this.updateDom();
 //	}
       } else {
         console.log(this.name + ': MQTT_PAYLOAD - No payload');
