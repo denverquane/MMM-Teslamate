@@ -151,6 +151,7 @@ Module.register("MMM-Teslamate", {
     const energyAdded = this.subscriptions["charge_added"].value;
     const locked = this.subscriptions["locked"].value;
     const sentry = this.subscriptions["sentry"].value;
+    const windowsOpen = this.subscriptions["windows"].value;
 
     const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
 
@@ -182,7 +183,8 @@ Module.register("MMM-Teslamate", {
     const data = {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
-      idealRange, estRange, speed, outside_temp, inside_temp, odometer 
+      idealRange, estRange, speed, outside_temp, inside_temp, odometer,
+      windowsOpen
     }
 
     if (this.config.graphicView)
@@ -218,7 +220,8 @@ Module.register("MMM-Teslamate", {
     const { 
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
-      idealRange, estRange, speed, outside_temp, inside_temp, odometer 
+      idealRange, estRange, speed, outside_temp, inside_temp, odometer,
+      windowsOpen
     } = data;
 
     const getBatteryLevelClass = function (bl, warn, danger) {
@@ -327,10 +330,13 @@ Module.register("MMM-Teslamate", {
     const { 
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
-      idealRange, estRange, speed, outside_temp, inside_temp, odometer 
+      idealRange, estRange, speed, outside_temp, inside_temp, odometer,
+      windowsOpen
     } = data;
 
     const stateIcons = []
+    if (state == "online")
+      stateIcons.push({ icon: "signal", opacity: 0.75 });
     if (state == "offline")
       stateIcons.push({ icon: "signal-off", opacity: 0.75 });
     if (state == "asleep" || state == "suspended")
@@ -345,8 +351,8 @@ Module.register("MMM-Teslamate", {
       stateIcons.push({ icon: "cctv" });
     if (state == "updating")
       stateIcons.push({ icon: "cog-clockwise" });
-    if (state == "online")
-      stateIcons.push({ icon: "signal", opacity: 0.75 });
+    if (windowsOpen == "true")
+      stateIcons.push({ icon: "window-open" });
 
     const teslaModel = this.config.carImageOptions.model || "m3";
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
