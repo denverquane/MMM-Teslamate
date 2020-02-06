@@ -1,7 +1,7 @@
 # MMM-Teslamate
 ## Magic Mirror Module for the Teslamate utility
 
-![Teslamate_PluggedIn.png](doc/plugged_in.PNG) ![Teslamate_NotPluggedIn.png](doc/not_plugged_in.PNG) ![Teslamate_GraphicModel3.png](doc/graphic_m3.PNG) 
+![Teslamate_PluggedIn.png](doc/plugged_in.PNG) ![Teslamate_NotPluggedIn.png](doc/not_plugged_in.PNG) ![Teslamate_GraphicModel3.png](doc/graphic_m3.png) 
 
 Big thanks to [adriankumpf](https://github.com/adriankumpf) for their incredible work on the [Teslamate](https://github.com/adriankumpf/teslamate) project,
 as well as [aduyng](https://github.com/aduyng) for their [TeslaStatus](https://github.com/aduyng/MMM-TeslaStatus) module used as a template!
