@@ -1,7 +1,7 @@
 # MMM-Teslamate
 ## Magic Mirror Module for the Teslamate utility
 
-![Teslamate_PluggedIn.png](doc/plugged_in.PNG) ![Teslamate_NotPluggedIn.png](doc/not_plugged_in.PNG) 
+![Teslamate_PluggedIn.png](doc/plugged_in.PNG) ![Teslamate_NotPluggedIn.png](doc/not_plugged_in.PNG) ![Teslamate_GraphicModel3.png](doc/graphic_m3.PNG) 
 
 Big thanks to [adriankumpf](https://github.com/adriankumpf) for their incredible work on the [Teslamate](https://github.com/adriankumpf/teslamate) project,
 as well as [aduyng](https://github.com/aduyng) for their [TeslaStatus](https://github.com/aduyng/MMM-TeslaStatus) module used as a template!
@@ -39,6 +39,25 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
         //above the warning value, battery levels are green
 	gMapsApiKey: "AIz...", //optional
         mapZoomLevel: 12
+
+        // set to true to enable the graphic view
+        graphicView: false,
+        carImageOptions: {
+            model: "m3", // mx, ms (S pre-refresh), ? (S post-refresh)
+            
+            view: "STUD_3QTR", // STUD_SIDE works better for S/X
+            
+            // full list of option codes: https://tesla-api.timdorr.com/vehicle/optioncodes.
+            // you need at least the color and the wheels. not all combos work.
+            // also consult: https://teslaownersonline.com/threads/teslas-image-compositor.7089/
+            options: "PPSW,W32B,SLR1",
+
+            // play with this until it looks about right.
+            // tested values: 0 for m3/STUD_3QTR, 25 for ms/STUD_SIDE
+            verticalOffset: 0,
+
+            opacity: 0.5
+        }
     }
 },
 ```
