@@ -105,7 +105,7 @@ Module.register("MMM-Teslamate", {
         //var updatedImportant = false;
 	for (let key in this.subscriptions) {
           sub = this.subscriptions[key];
-          console.log(sub);
+          //console.log(sub);
           if (sub.serverKey == payload.serverKey && sub.topic == payload.topic) {
             var value = payload.value;
             sub.value = value;
@@ -330,16 +330,23 @@ Module.register("MMM-Teslamate", {
       idealRange, estRange, speed, outside_temp, inside_temp, odometer 
     } = data;
 
+    const stateIcons = []
     if (state == "offline")
-      state_icon = "signal-off";
-    else if (state == "asleep")
-      state_icon = "sleep"
-    else if (pluggedIn == "true")
-      state_icon = "flash";
-    else if (sentry == "true")
-      state_icon = "cctv";
-    else
-      state_icon = "signal";
+      stateIcons.push({ icon: "signal-off", opacity: 0.75 });
+    if (state == "asleep" || state == "suspended")
+      stateIcons.push({ icon: "sleep", opacity: 0.75 });
+    if (state == "suspended")
+      stateIcons.push({ icon: "timer-sand" });
+    if (pluggedIn == "true")
+      stateIcons.push({ icon: "ev-station" });
+    if (locked == "false")
+      stateIcons.push({ icon: "lock-open-variant" });
+    if (sentry == "true")
+      stateIcons.push({ icon: "cctv" });
+    if (state == "updating")
+      stateIcons.push({ icon: "cog-clockwise" });
+    if (state == "online")
+      stateIcons.push({ icon: "signal", opacity: 0.75 });
 
     const teslaModel = this.config.carImageOptions.model || "m3";
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
@@ -348,6 +355,9 @@ Module.register("MMM-Teslamate", {
     const teslaImageUrl = `https://static-assets.tesla.com/v1/compositor/?model=${teslaModel}&view=${teslaView}&size=450&options=${teslaOptions}&bkba_opt=1`;
     const imageOffset = this.config.carImageOptions.verticalOffset || 0;
     const imageOpacity = this.config.carImageOptions.imageOpacity || 0.4;
+
+    const renderedStateIcons = stateIcons.map((icon) => 
+      `<span class="mdi mdi-${icon.icon}" ${icon.opacity ? "style='opacity: " + icon.opacity + "'" : ""}></span>`)
 
     wrapper.innerHTML = `
       <div style="width: 450px; height: 253px;">
@@ -407,9 +417,9 @@ Module.register("MMM-Teslamate", {
                           ${chargeLimitSOC === 0 ? "visibility: hidden" : ""}
                           border-left: 1px dashed #888"></div>
                           
-              <!-- State icon -->
+              <!-- State icons -->
               <div style="position: relative; top: -120px; left: 0; text-align: center; z-index: 5">
-                <span class="mdi mdi-${state_icon}" ${(state == "offline" || state == "asleep") ? "style='opacity: 0.75'" : ""}></span>
+                ${ renderedStateIcons.join(" ") }
               </div>
               
             </div>
