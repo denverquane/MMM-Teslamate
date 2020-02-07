@@ -105,7 +105,7 @@ Module.register("MMM-Teslamate", {
         //var updatedImportant = false;
 	for (let key in this.subscriptions) {
           sub = this.subscriptions[key];
-          console.log(sub);
+          //console.log(sub);
           if (sub.serverKey == payload.serverKey && sub.topic == payload.topic) {
             var value = payload.value;
             sub.value = value;
@@ -151,6 +151,7 @@ Module.register("MMM-Teslamate", {
     const energyAdded = this.subscriptions["charge_added"].value;
     const locked = this.subscriptions["locked"].value;
     const sentry = this.subscriptions["sentry"].value;
+    const windowsOpen = this.subscriptions["windows"].value;
 
     const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
 
@@ -178,6 +179,50 @@ Module.register("MMM-Teslamate", {
       outside_temp = cToFFixed(outside_temp, 1);
       inside_temp = cToFFixed(inside_temp, 1);
     }
+
+    const data = {
+      carName, state, latitude, longitude, battery, chargeLimitSOC,
+      chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
+      idealRange, estRange, speed, outside_temp, inside_temp, odometer,
+      windowsOpen
+    }
+
+    if (this.config.graphicView)
+      this.generateGraphicDom(wrapper, data);
+    else
+      this.generateTableDom(wrapper, data);
+
+  //   <li class="mattribute sentry-mode ${
+  //     locked ? 'sentry-mode-active' : ''
+  //     }">
+  //     <span class="icon zmdi zmdi-lock zmdi-hc-fw"></span>
+  //     <span class="name">Lock</span>
+  //     <span class="value">${ locked ?
+  //       '<span class="zmdi zmdi-lock"></span> Locked' :
+  //       '<span class="zmdi zmdi-lock-open"></span> Unlocked'}
+  //     </span>
+  //   </li>
+  //   <li class="mattribute sentry-mode ${
+  //     sentry ? 'sentry-mode-active' : ''
+  //     }">
+  //     <span class="icon zmdi zmdi-shield-security zmdi-hc-fw"></span>
+  //     <span class="name">Sentry Mode</span>
+  //     <span class="value">${ sentry ?
+  //       '<span class="zmdi zmdi-play-circle"></span> Enabled' : 'Disabled'}
+  //     </span>
+  //   </li>
+  // </ul>
+	// 	`;
+    return wrapper;
+  },
+
+  generateTableDom: function(wrapper, data) {
+    const { 
+      carName, state, latitude, longitude, battery, chargeLimitSOC,
+      chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
+      idealRange, estRange, speed, outside_temp, inside_temp, odometer,
+      windowsOpen
+    } = data;
 
     const getBatteryLevelClass = function (bl, warn, danger) {
       if (bl < danger) {
@@ -279,27 +324,115 @@ Module.register("MMM-Teslamate", {
 
     attrList.appendChild(odometerLi);
     wrapper.appendChild(attrList);
-  //   <li class="mattribute sentry-mode ${
-  //     locked ? 'sentry-mode-active' : ''
-  //     }">
-  //     <span class="icon zmdi zmdi-lock zmdi-hc-fw"></span>
-  //     <span class="name">Lock</span>
-  //     <span class="value">${ locked ?
-  //       '<span class="zmdi zmdi-lock"></span> Locked' :
-  //       '<span class="zmdi zmdi-lock-open"></span> Unlocked'}
-  //     </span>
-  //   </li>
-  //   <li class="mattribute sentry-mode ${
-  //     sentry ? 'sentry-mode-active' : ''
-  //     }">
-  //     <span class="icon zmdi zmdi-shield-security zmdi-hc-fw"></span>
-  //     <span class="name">Sentry Mode</span>
-  //     <span class="value">${ sentry ?
-  //       '<span class="zmdi zmdi-play-circle"></span> Enabled' : 'Disabled'}
-  //     </span>
-  //   </li>
-  // </ul>
-	// 	`;
-    return wrapper;
+  },
+
+  generateGraphicDom: function(wrapper, data) {
+    const { 
+      carName, state, latitude, longitude, battery, chargeLimitSOC,
+      chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
+      idealRange, estRange, speed, outside_temp, inside_temp, odometer,
+      windowsOpen
+    } = data;
+
+    const stateIcons = []
+    if (state == "online")
+      stateIcons.push({ icon: "signal", opacity: 0.75 });
+    if (state == "offline")
+      stateIcons.push({ icon: "signal-off", opacity: 0.75 });
+    if (state == "asleep" || state == "suspended")
+      stateIcons.push({ icon: "sleep", opacity: 0.75 });
+    if (state == "suspended")
+      stateIcons.push({ icon: "timer-sand" });
+    if (pluggedIn == "true")
+      stateIcons.push({ icon: "ev-station" });
+    if (locked == "false")
+      stateIcons.push({ icon: "lock-open-variant" });
+    if (sentry == "true")
+      stateIcons.push({ icon: "cctv" });
+    if (state == "updating")
+      stateIcons.push({ icon: "cog-clockwise" });
+    if (windowsOpen == "true")
+      stateIcons.push({ icon: "window-open" });
+
+    const teslaModel = this.config.carImageOptions.model || "m3";
+    const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
+    const teslaOptions = this.config.carImageOptions.options || "PPSW,W32B,SLR1";
+
+    const teslaImageUrl = `https://static-assets.tesla.com/v1/compositor/?model=${teslaModel}&view=${teslaView}&size=450&options=${teslaOptions}&bkba_opt=1`;
+    const imageOffset = this.config.carImageOptions.verticalOffset || 0;
+    const imageOpacity = this.config.carImageOptions.imageOpacity || 0.4;
+
+    const renderedStateIcons = stateIcons.map((icon) => 
+      `<span class="mdi mdi-${icon.icon}" ${icon.opacity ? "style='opacity: " + icon.opacity + "'" : ""}></span>`)
+
+    wrapper.innerHTML = `
+      <div style="width: 450px; height: 253px;">
+        <link href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"> 
+        <div style="z-index: 1; position: absolute; top: 0px; left: 0px; 
+                    width: 450px; height: 253px; 
+                    opacity: ${imageOpacity}; 
+                    background-image: url('${teslaImageUrl}'); 
+                    background-position: 0px ${imageOffset}px;
+                    ">
+        </div>
+        <div style="z-index: 2; position: absolute; top: 0px; left: 0px;">
+
+          <!-- Percentage/range -->
+          <div style="margin-top: 50px; margin-left: auto; text-align: center; width: 450px; height: 70px">
+            <span class="bright large light">${battery}</span><span class="normal medium">%</span>
+          </div>
+
+          <!-- Battery graphic - outer border -->
+          <div style="margin-left: 100px; 
+                      width: 250px; height: 75px;
+                      border: 2px solid #aaa;
+                      border-radius: 10px">
+
+            <!-- Plus pole -->
+            <div style="position: relative; top: 27px; left: 250px;
+                        width: 8px; height: 19px;
+                        border: 2px solid #aaa;
+                        border-top-right-radius: 5px;
+                        border-bottom-right-radius: 5px;
+                        border-left: none;
+                        background: #000">
+                <div style="width: 8px; height: 19px;
+                            opacity: ${imageOpacity};
+                            background-image: url('${teslaImageUrl}'); 
+                            background-position: -351px ${imageOffset-152}px""></div>
+            </div>
+
+            <!-- Inner border -->
+            <div style="position: relative; top: -23px; left: 0px; margin: 5px;
+                        width: 238px; height: 63px;
+                        border: 1px solid #aaa;
+                        border-radius: 3px">
+
+              <!-- Colored fill state -->
+              <div style="position: relative; top: 0px; left: 0px; z-index: 2;
+                          width: ${Math.round(2.38 * battery)}px;
+                          height: 63px;
+                          opacity: 0.9;
+                          border-top-left-radius: 2.5px;
+                          border-bottom-left-radius: 2.5px;
+                          background-color: #068A00"></div>
+
+              <!-- Charge limit marker -->
+              <div style="position: relative; top: -63px; left: ${Math.round(2.38 * chargeLimitSOC)-1}px;
+                          height: 63px; width: 2px;
+                          ${chargeLimitSOC === 0 ? "visibility: hidden" : ""}
+                          border-left: 1px dashed #888"></div>
+                          
+              <!-- State icons -->
+              <div style="position: relative; top: -120px; left: 0; text-align: center; z-index: 5">
+                ${ renderedStateIcons.join(" ") }
+              </div>
+              
+            </div>
+          </div>
+
+        </div>
+      </div>
+		`;
   }
 });
