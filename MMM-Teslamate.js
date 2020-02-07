@@ -156,6 +156,7 @@ Module.register("MMM-Teslamate", {
     const sentry = this.subscriptions["sentry"].value;
     const windowsOpen = this.subscriptions["windows"].value;
     const isClimateOn = this.subscriptions["climate_on"].value;
+    const isHealthy = this.subscriptions["health"].value;
 
     const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
 
@@ -188,7 +189,7 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen, batteryUsable, isClimateOn
+      windowsOpen, batteryUsable, isClimateOn, isHealthy
     }
 
     if (this.config.graphicView)
@@ -225,7 +226,7 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen, batteryUsable, isClimateOn
+      windowsOpen, batteryUsable, isClimateOn, isHealthy
     } = data;
 
     const getBatteryLevelClass = function (bl, warn, danger) {
@@ -335,7 +336,7 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen, batteryUsable, isClimateOn
+      windowsOpen, batteryUsable, isClimateOn, isHealthy
     } = data;
 
     const stateIcons = [];
@@ -354,9 +355,12 @@ Module.register("MMM-Teslamate", {
     if (isClimateOn == "true")
       stateIcons.push("air-conditioner");
 
-    const networkIcons = [(state == "offline") ? "signal-off" : "signal"];
+    const networkIcons = [];
     if (state == "updating")
       networkIcons.push("cog-clockwise");
+    if (isHealthy != "true")
+      networkIcons.push("alert-box");
+    networkIcons.push((state == "offline") ? "signal-off" : "signal");
 
     const teslaModel = this.config.carImageOptions.model || "m3";
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
@@ -367,7 +371,7 @@ Module.register("MMM-Teslamate", {
     const imageOpacity = this.config.carImageOptions.imageOpacity || 0.4;
 
     const renderedStateIcons = stateIcons.map((icon) => `<span class="mdi mdi-${icon}"></span>`)
-    const renderedNetworkIcons = networkIcons.map((icon) => `<span class="mdi mdi-${icon}"></span>`)
+    const renderedNetworkIcons = networkIcons.map((icon) => `<span class="mdi mdi-${icon}" ${icon=="alert-box"?"style='color: #f66'":""}></span>`)
 
     const batteryReserveVisible = (battery - batteryUsable) > 1; // at <= 1% reserve the app and the car don't show it, so we won't either
 
