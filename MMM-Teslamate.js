@@ -351,6 +351,8 @@ Module.register("MMM-Teslamate", {
       stateIcons.push("cctv");
     if (windowsOpen == "true")
       stateIcons.push("window-open");
+    if (isClimateOn == "true")
+      stateIcons.push("air-conditioner");
 
     const networkIcons = [(state == "offline") ? "signal-off" : "signal"];
     if (state == "updating")
