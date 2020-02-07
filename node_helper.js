@@ -13,9 +13,10 @@ const Topics = {
     locked: 'teslamate/cars/1/locked',
     sentry: 'teslamate/cars/1/sentry_mode',
     windows: 'teslamate/cars/1/windows_open',
-  
+    
     outside_temp: 'teslamate/cars/1/outside_temp',
     inside_temp: 'teslamate/cars/1/inside_temp',
+    climate_on: 'teslamate/cars/1/is_climate_on',
   
     odometer: 'teslamate/cars/1/odometer',
     ideal_range: 'teslamate/cars/1/ideal_battery_range_km',
@@ -23,6 +24,7 @@ const Topics = {
     rated_range: 'teslamate/cars/1/rated_battery_range_km',
   
     battery: 'teslamate/cars/1/battery_level',
+    battery_usable: 'teslamate/cars/1/usable_battery_level',
     plugged_in: 'teslamate/cars/1/plugged_in',
     charge_added: 'teslamate/cars/1/charge_energy_added',
     charge_limit: 'teslamate/cars/1/charge_limit_soc',
