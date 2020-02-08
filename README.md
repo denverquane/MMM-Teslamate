@@ -1,7 +1,13 @@
 # MMM-Teslamate
 ## Magic Mirror Module for the Teslamate utility
 
-![Teslamate_PluggedIn.png](doc/plugged_in.PNG) ![Teslamate_NotPluggedIn.png](doc/not_plugged_in.PNG) ![Teslamate_GraphicModel3.png](doc/graphic_m3.png) 
+## Graphic Mode
+![Teslamate_GraphicModel3.png](doc/graphic_m3.png)
+
+Big thanks to [olexs](https://github.com/olexs) for this mode!
+
+## Table Mode
+![Teslamate_PluggedIn.png](doc/plugged_in.PNG) ![Teslamate_NotPluggedIn.png](doc/not_plugged_in.PNG)  
 
 Big thanks to [adriankumpf](https://github.com/adriankumpf) for their incredible work on the [Teslamate](https://github.com/adriankumpf/teslamate) project,
 as well as [aduyng](https://github.com/aduyng) for their [TeslaStatus](https://github.com/aduyng/MMM-TeslaStatus) module used as a template!
@@ -37,11 +43,9 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
         batteryDanger: 30, //below this value, battery levels are red
         batteryWarning: 50, //below this value, battery levels are yellow
         //above the warning value, battery levels are green
-	gMapsApiKey: "AIz...", //optional
-        mapZoomLevel: 12
 
         // set to true to enable the graphic view
-        graphicView: false,
+        graphicView: true,
         carImageOptions: {
             model: "m3", // mx, ms (S pre-refresh), ? (S post-refresh)
             
@@ -61,8 +65,6 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
     }
 },
 ```
-
-You can obtain a Google Maps API key from [here](https://cloud.google.com/maps-platform/#get-started), but if no key is provided then the map iframe is disabled (to force the map to not display, simply omit or comment out your API key).
 
 ## Notes
 * Some fields (charge added, time to full charge) are currently only enabled if the vehicle is plugged in
