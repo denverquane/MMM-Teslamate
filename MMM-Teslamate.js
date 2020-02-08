@@ -15,6 +15,7 @@ const Topics = {
 
   outside_temp: 'teslamate/cars/1/outside_temp',
   inside_temp: 'teslamate/cars/1/inside_temp',
+  climate_on: 'teslamate/cars/1/is_climate_on',
 
   odometer: 'teslamate/cars/1/odometer',
   ideal_range: 'teslamate/cars/1/ideal_battery_range_km',
@@ -22,6 +23,7 @@ const Topics = {
   rated_range: 'teslamate/cars/1/rated_battery_range_km',
 
   battery: 'teslamate/cars/1/battery_level',
+  battery_usable: 'teslamate/cars/1/usable_battery_level',
   plugged_in: 'teslamate/cars/1/plugged_in',
   charge_added: 'teslamate/cars/1/charge_energy_added',
   charge_limit: 'teslamate/cars/1/charge_limit_soc',
@@ -143,6 +145,7 @@ Module.register("MMM-Teslamate", {
     const latitude = this.subscriptions["lat"].value;
     const longitude = this.subscriptions["lon"].value;
     const battery = this.subscriptions["battery"].value;
+    const batteryUsable = this.subscriptions["battery_usable"].value;
     const chargeLimitSOC = this.subscriptions["charge_limit"].value;
     //TODO format this correctly
     const chargeStart = this.subscriptions["charge_start"].value;
@@ -152,6 +155,8 @@ Module.register("MMM-Teslamate", {
     const locked = this.subscriptions["locked"].value;
     const sentry = this.subscriptions["sentry"].value;
     const windowsOpen = this.subscriptions["windows"].value;
+    const isClimateOn = this.subscriptions["climate_on"].value;
+    const isHealthy = this.subscriptions["health"].value;
 
     const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
 
@@ -184,7 +189,7 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen
+      windowsOpen, batteryUsable, isClimateOn, isHealthy
     }
 
     if (this.config.graphicView)
@@ -221,7 +226,7 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen
+      windowsOpen, batteryUsable, isClimateOn, isHealthy
     } = data;
 
     const getBatteryLevelClass = function (bl, warn, danger) {
@@ -331,28 +336,31 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen
+      windowsOpen, batteryUsable, isClimateOn, isHealthy
     } = data;
 
-    const stateIcons = []
-    if (state == "online")
-      stateIcons.push({ icon: "signal", opacity: 0.75 });
-    if (state == "offline")
-      stateIcons.push({ icon: "signal-off", opacity: 0.75 });
+    const stateIcons = [];
     if (state == "asleep" || state == "suspended")
-      stateIcons.push({ icon: "sleep", opacity: 0.75 });
+      stateIcons.push("power-sleep");
     if (state == "suspended")
-      stateIcons.push({ icon: "timer-sand" });
+      stateIcons.push("timer-sand");
     if (pluggedIn == "true")
-      stateIcons.push({ icon: "ev-station" });
+      stateIcons.push("ev-station");
     if (locked == "false")
-      stateIcons.push({ icon: "lock-open-variant" });
+      stateIcons.push("lock-open-variant");
     if (sentry == "true")
-      stateIcons.push({ icon: "cctv" });
-    if (state == "updating")
-      stateIcons.push({ icon: "cog-clockwise" });
+      stateIcons.push("cctv");
     if (windowsOpen == "true")
-      stateIcons.push({ icon: "window-open" });
+      stateIcons.push("window-open");
+    if (isClimateOn == "true")
+      stateIcons.push("air-conditioner");
+
+    const networkIcons = [];
+    if (state == "updating")
+      networkIcons.push("cog-clockwise");
+    if (isHealthy != "true")
+      networkIcons.push("alert-box");
+    networkIcons.push((state == "offline") ? "signal-off" : "signal");
 
     const teslaModel = this.config.carImageOptions.model || "m3";
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
@@ -362,8 +370,10 @@ Module.register("MMM-Teslamate", {
     const imageOffset = this.config.carImageOptions.verticalOffset || 0;
     const imageOpacity = this.config.carImageOptions.imageOpacity || 0.4;
 
-    const renderedStateIcons = stateIcons.map((icon) => 
-      `<span class="mdi mdi-${icon.icon}" ${icon.opacity ? "style='opacity: " + icon.opacity + "'" : ""}></span>`)
+    const renderedStateIcons = stateIcons.map((icon) => `<span class="mdi mdi-${icon}"></span>`)
+    const renderedNetworkIcons = networkIcons.map((icon) => `<span class="mdi mdi-${icon}" ${icon=="alert-box"?"style='color: #f66'":""}></span>`)
+
+    const batteryReserveVisible = (battery - batteryUsable) > 1; // at <= 1% reserve the app and the car don't show it, so we won't either
 
     wrapper.innerHTML = `
       <div style="width: 450px; height: 253px;">
@@ -379,7 +389,17 @@ Module.register("MMM-Teslamate", {
 
           <!-- Percentage/range -->
           <div style="margin-top: 50px; margin-left: auto; text-align: center; width: 450px; height: 70px">
-            <span class="bright large light">${battery}</span><span class="normal medium">%</span>
+            <span class="bright large light">${batteryUsable}</span><span class="normal medium">%</span>
+          </div>
+
+          <!-- State icons -->
+          <div style="float: left; margin-top: -65px; margin-left: 95px; text-align: left;" class="small">
+            ${ renderedStateIcons.join(" ") }
+          </div>
+
+          <!-- Online state icon -->
+          <div style="float: right; margin-top: -65px; margin-right: 95px; text-align: right;" class="small">
+            ${ renderedNetworkIcons.join(" ") }
           </div>
 
           <!-- Battery graphic - outer border -->
@@ -408,24 +428,34 @@ Module.register("MMM-Teslamate", {
                         border: 1px solid #aaa;
                         border-radius: 3px">
 
-              <!-- Colored fill state -->
+              <!-- Green charge rectangle -->
               <div style="position: relative; top: 0px; left: 0px; z-index: 2;
-                          width: ${Math.round(2.38 * battery)}px;
+                          width: ${Math.round(2.38 * batteryUsable)}px;
                           height: 63px;
-                          opacity: 0.9;
+                          opacity: 0.8;
                           border-top-left-radius: 2.5px;
                           border-bottom-left-radius: 2.5px;
                           background-color: #068A00"></div>
 
+              <!-- Blue reserved charge rectangle -->
+              <div style="position: relative; top: -63px; left: ${Math.round(2.38 * batteryUsable)}px; z-index: 2;
+                          width: ${Math.round(2.38 * (battery - batteryUsable))}px;
+                          visibility: ${batteryReserveVisible ? 'visible' : 'hidden'};
+                          height: 63px;
+                          opacity: 0.8;
+                          border-top-left-radius: 2.5px;
+                          border-bottom-left-radius: 2.5px;
+                          background-color: #366aa5"></div>
+
               <!-- Charge limit marker -->
-              <div style="position: relative; top: -63px; left: ${Math.round(2.38 * chargeLimitSOC)-1}px;
+              <div style="position: relative; top: -126px; left: ${Math.round(2.38 * chargeLimitSOC)-1}px;
                           height: 63px; width: 2px;
                           ${chargeLimitSOC === 0 ? "visibility: hidden" : ""}
                           border-left: 1px dashed #888"></div>
                           
-              <!-- State icons -->
-              <div style="position: relative; top: -120px; left: 0; text-align: center; z-index: 5">
-                ${ renderedStateIcons.join(" ") }
+              <!-- Snowflake icon -->
+              <div style="position: relative; top: -182px; left: 0; text-align: center; z-index: 5">
+                <span class="mdi mdi-snowflake bright light" style="visibility: ${batteryReserveVisible ? 'visible' : 'hidden'}"></span>
               </div>
               
             </div>
