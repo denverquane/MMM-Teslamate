@@ -150,9 +150,9 @@ Module.register("MMM-Teslamate", {
     //TODO format this correctly
     const chargeStart = this.subscriptions["charge_start"].value;
     const timeToFull = this.subscriptions["charge_time"].value;
-    const pluggedIn = this.subscriptions["plugged_in"].value && timeToFull > 0.0;
+    const pluggedIn = "true"; // this.subscriptions["plugged_in"].value && timeToFull > 0.0;
     const energyAdded = this.subscriptions["charge_added"].value;
-    const locked = this.subscriptions["locked"].value;
+    const locked = "false"; // this.subscriptions["locked"].value;
     const sentry = this.subscriptions["sentry"].value;
     const windowsOpen = this.subscriptions["windows"].value;
     const isClimateOn = this.subscriptions["climate_on"].value;
@@ -393,7 +393,7 @@ Module.register("MMM-Teslamate", {
           </div>
 
           <!-- State icons -->
-          <div style="float: left; margin-top: -65px; margin-left: 95px; text-align: left;" class="small">
+          <div style="float: left; margin-top: -65px; margin-left: 95px; text-align: left; ${ state == "offline" ? 'opacity: 0.3;' : '' }" class="small">
             ${ renderedStateIcons.join(" ") }
           </div>
 
