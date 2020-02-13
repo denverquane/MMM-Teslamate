@@ -150,9 +150,10 @@ Module.register("MMM-Teslamate", {
     //TODO format this correctly
     const chargeStart = this.subscriptions["charge_start"].value;
     const timeToFull = this.subscriptions["charge_time"].value;
-    const pluggedIn = "true"; // this.subscriptions["plugged_in"].value && timeToFull > 0.0;
+    const pluggedIn = this.subscriptions["plugged_in"].value;
+    const charging = pluggedIn && timeToFull > 0.0;
     const energyAdded = this.subscriptions["charge_added"].value;
-    const locked = "false"; // this.subscriptions["locked"].value;
+    const locked = this.subscriptions["locked"].value;
     const sentry = this.subscriptions["sentry"].value;
     const windowsOpen = this.subscriptions["windows"].value;
     const isClimateOn = this.subscriptions["climate_on"].value;
@@ -189,7 +190,7 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen, batteryUsable, isClimateOn, isHealthy
+      windowsOpen, batteryUsable, isClimateOn, isHealthy, charging
     }
 
     if (this.config.graphicView)
@@ -226,7 +227,7 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen, batteryUsable, isClimateOn, isHealthy
+      windowsOpen, batteryUsable, isClimateOn, isHealthy, charging
     } = data;
 
     const getBatteryLevelClass = function (bl, warn, danger) {
@@ -305,7 +306,7 @@ Module.register("MMM-Teslamate", {
     attrList.appendChild(maxBatteryLi);
     attrList.appendChild(rangeCompare);
 
-    if (pluggedIn) {
+    if (charging) {
       var energyAddedLi = document.createElement("li");
       energyAddedLi.className = "mattribute";
       energyAddedLi.appendChild(makeSpan("icon zmdi zmdi-input-power zmdi-hc-fw", ""));
@@ -336,7 +337,7 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen, batteryUsable, isClimateOn, isHealthy
+      windowsOpen, batteryUsable, isClimateOn, isHealthy, charging
     } = data;
 
     const stateIcons = [];
@@ -345,7 +346,7 @@ Module.register("MMM-Teslamate", {
     if (state == "suspended")
       stateIcons.push("timer-sand");
     if (pluggedIn == "true")
-      stateIcons.push("ev-station");
+      stateIcons.push("power-plug");
     if (locked == "false")
       stateIcons.push("lock-open-variant");
     if (sentry == "true")
@@ -374,6 +375,10 @@ Module.register("MMM-Teslamate", {
     const renderedNetworkIcons = networkIcons.map((icon) => `<span class="mdi mdi-${icon}" ${icon=="alert-box"?"style='color: #f66'":""}></span>`)
 
     const batteryReserveVisible = (battery - batteryUsable) > 1; // at <= 1% reserve the app and the car don't show it, so we won't either
+
+    const batteryOverlayIcon = charging ? `<span class="mdi mdi-flash bright light"></span>` :
+                               batteryReserveVisible ? `<span class="mdi mdi-snowflake bright light"></span>` :
+                               '';
 
     wrapper.innerHTML = `
       <div style="width: 450px; height: 253px;">
@@ -453,9 +458,9 @@ Module.register("MMM-Teslamate", {
                           ${chargeLimitSOC === 0 ? "visibility: hidden" : ""}
                           border-left: 1px dashed #888"></div>
                           
-              <!-- Snowflake icon -->
+              <!-- Battery overlay icon (charging or snowflake) -->
               <div style="position: relative; top: -182px; left: 0; text-align: center; z-index: 5">
-                <span class="mdi mdi-snowflake bright light" style="visibility: ${batteryReserveVisible ? 'visible' : 'hidden'}"></span>
+                ${batteryOverlayIcon}
               </div>
               
             </div>
