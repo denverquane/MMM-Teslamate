@@ -266,7 +266,7 @@ Module.register("MMM-Teslamate", {
       timeToFullLi.appendChild(makeSpan("value", makeChargeRemString(timeToFull)));
       attrList.appendChild(energyAddedLi);
       attrList.appendChild(timeToFullLi);
-    } else if (pluggedIn) { 
+    } else if (pluggedIn && chargeStart !== "") { 
       var chargeStartLi = document.createElement("li");
       chargeStartLi.className = "mattribute";
       chargeStartLi.appendChild(makeSpan("icon zmdi zmdi-time zmdi-hc-fw", ""));
