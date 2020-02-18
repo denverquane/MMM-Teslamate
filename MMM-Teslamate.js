@@ -55,10 +55,6 @@ Module.register("MMM-Teslamate", {
   defaults: {
     mqttServer: {},
     imperial: false,
-    batteryDanger: 30,
-    batteryWarning: 50,
-    gMapsApiKey: "",
-    mapZoomLevel: 10,
   },
 
   makeServerKey: function (server) {
@@ -91,9 +87,6 @@ Module.register("MMM-Teslamate", {
 
     this.openMqttConnection();
     var self = this;
-//    setInterval(function () {
-//      self.updateDom(100);
-//    }, 300000); //every 5 minutes
 
   },
 
@@ -104,7 +97,6 @@ Module.register("MMM-Teslamate", {
   socketNotificationReceived: function (notification, payload) {
     if (notification === 'MQTT_PAYLOAD') {
       if (payload != null) {
-        //var updatedImportant = false;
 	for (let key in this.subscriptions) {
           sub = this.subscriptions[key];
           //console.log(sub);
@@ -113,16 +105,10 @@ Module.register("MMM-Teslamate", {
             sub.value = value;
             sub.time = payload.time;
 
-//	    if ((key === "lat" || key === "lon") && sub.value.toFixed(4) !== this.subscriptions.value.toFixed(4)) {
-//		console.log("Updated important");
-//		updatedImportant = true;
-//	    }
             this.subscriptions[key] = sub;
           }
         }
-//	if (updatedImportant) {
 	  this.updateDom();
-//	}
       } else {
         console.log(this.name + ': MQTT_PAYLOAD - No payload');
       }
@@ -147,7 +133,7 @@ Module.register("MMM-Teslamate", {
     const battery = this.subscriptions["battery"].value;
     const batteryUsable = this.subscriptions["battery_usable"].value;
     const chargeLimitSOC = this.subscriptions["charge_limit"].value;
-    //TODO format this correctly
+    
     const chargeStart = this.subscriptions["charge_start"].value;
     const timeToFull = this.subscriptions["charge_time"].value;
     const pluggedIn = this.subscriptions["plugged_in"].value;
@@ -159,7 +145,7 @@ Module.register("MMM-Teslamate", {
     const isClimateOn = this.subscriptions["climate_on"].value;
     const isHealthy = this.subscriptions["health"].value;
 
-    const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
+    //const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
 
     var idealRange = this.subscriptions["ideal_range"].value ? this.subscriptions["ideal_range"].value : 0;
     var estRange = this.subscriptions["est_range"].value ? this.subscriptions["est_range"].value : 0;
@@ -188,61 +174,41 @@ Module.register("MMM-Teslamate", {
 
     const data = {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
-      chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
+      chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging
     }
 
-    if (this.config.graphicView)
-      this.generateGraphicDom(wrapper, data);
-    else
+    //always graphic mode
+    this.generateGraphicDom(wrapper, data);
+    
+    //optionally append the table
+    if (this.config.hybridView)
       this.generateTableDom(wrapper, data);
-
-  //   <li class="mattribute sentry-mode ${
-  //     locked ? 'sentry-mode-active' : ''
-  //     }">
-  //     <span class="icon zmdi zmdi-lock zmdi-hc-fw"></span>
-  //     <span class="name">Lock</span>
-  //     <span class="value">${ locked ?
-  //       '<span class="zmdi zmdi-lock"></span> Locked' :
-  //       '<span class="zmdi zmdi-lock-open"></span> Unlocked'}
-  //     </span>
-  //   </li>
-  //   <li class="mattribute sentry-mode ${
-  //     sentry ? 'sentry-mode-active' : ''
-  //     }">
-  //     <span class="icon zmdi zmdi-shield-security zmdi-hc-fw"></span>
-  //     <span class="name">Sentry Mode</span>
-  //     <span class="value">${ sentry ?
-  //       '<span class="zmdi zmdi-play-circle"></span> Enabled' : 'Disabled'}
-  //     </span>
-  //   </li>
-  // </ul>
-	// 	`;
+  
     return wrapper;
   },
 
   generateTableDom: function(wrapper, data) {
     const { 
       carName, state, latitude, longitude, battery, chargeLimitSOC,
-      chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
+      chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging
     } = data;
 
-    const getBatteryLevelClass = function (bl, warn, danger) {
-      if (bl < danger) {
-        return 'danger';
-      }
-      if (bl < warn) {
-        return 'warning';
-      }
-      if (bl >= warn) {
-        return 'ok';
-      }
-
-      return '';
-    };
+    //const getBatteryLevelClass = function (bl, warn, danger) {
+    //  if (bl < danger) {
+    //    return 'danger';
+    //  }
+    //  if (bl < warn) {
+    //    return 'warning';
+    //  }
+    //  if (bl >= warn) {
+    //    return 'ok';
+    //  }
+    //  return '';
+    //};
 
     const makeSpan = function(className, content) {
       var span = document.createElement("span");
@@ -251,60 +217,40 @@ Module.register("MMM-Teslamate", {
       return span;
     }
 
-    var title = document.createElement("h2");
-    title.className = "mqtt-title";
-    var iconSpan = document.createElement("span");
+    const makeChargeStartString = function (input) {
+      const diffMs = (Date.parse(input) - Date.now());
+      var diffDays = Math.floor(diffMs / 86400000);
+      var diffHrs = Math.floor((diffMs % 86400000) / 3600000);
+      var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+      var returnStr = (diffDays > 0 ? (diffDays + " Days, ") : "");
+      returnStr += (diffHrs > 0 ? (diffHrs + " Hour"+ (diffHrs > 1 ? "s" : "") + ", ") : "");
+      return returnStr + (diffMins > 0 ? (diffMins + " Min" + (diffMins > 1 ? "s" : "")) : "");
+    }
+
+    //TODO bother formatting days? Poor trickle chargers...
+    const makeChargeRemString = function (remHrs) {
+      const hrs = Math.floor(remHrs);
+      const mins = (remHrs - hrs) * 60.0;
+
+      return (hrs > 0 ? (hrs + " Hour"+ (hrs > 1 ? "s" : "") + ", ") : "") + (mins > 0 ? (mins + " Min" + (mins > 1 ? "s" : "")) : "");
+      
+    }
+
+    //var title = document.createElement("h2");
+    //title.className = "mqtt-title";
+    //var iconSpan = document.createElement("span");
 
     //TODO does this need to be "classlist"?
-    iconSpan.className = "zmdi zmdi-car zmdi-hc-2x icon"
-    title.innerHTML = carName;
-    title.prepend(iconSpan);
-    //if (!pluggedIn) {
-    //  var chargeIconSpan = document.createElement("span");
-    //  chargeIconSpan.className = "zmdi zmdi-input-power zmdi-hc-1x charge-icon";
-    //  title.appendChild(chargeIconSpan);
-    //}
+    //iconSpan.className = "zmdi zmdi-car zmdi-hc-2x icon"
+    //title.innerHTML = carName;
+    //title.prepend(iconSpan);
 
-    wrapper.appendChild(title);
+    //wrapper.appendChild(title);
 
     var attrList = document.createElement("ul");
     attrList.className = "mattributes";
-    if (this.config.gMapsApiKey !== "") {
-      var gmapLi = document.createElement("li");
-      gmapLi.className = "mattribute";
-      var iframe = document.createElement("iframe");
-      iframe.setAttribute("style", "border:0");
-      iframe.setAttribute("width", 400);
-      iframe.setAttribute("height", 300);
-      iframe.setAttribute("src", gUrl);
-      gmapLi.appendChild(iframe);
-      attrList.appendChild(gmapLi);
-    }
 
-    var batteryLi = document.createElement("li");
-    batteryLi.className = "mattribute battery-level battery-level-" 
-      + getBatteryLevelClass(battery, this.config.batteryWarning, this.config.batteryDanger);
-    batteryLi.appendChild(makeSpan("icon zmdi zmdi-battery zmdi-hc-fw", ""));
-    batteryLi.appendChild(makeSpan("name", "Current Battery"));
-    batteryLi.appendChild(makeSpan("value", battery + "%"));
-
-    var maxBatteryLi = document.createElement("li");
-    maxBatteryLi.className = "mattribute battery-level battery-level-" 
-      + getBatteryLevelClass(chargeLimitSOC, this.config.batteryWarning, this.config.batteryDanger);
-    maxBatteryLi.appendChild(makeSpan("icon zmdi zmdi-battery zmdi-hc-fw", ""));
-    maxBatteryLi.appendChild(makeSpan("name", "Max Battery"));
-    maxBatteryLi.appendChild(makeSpan("value", chargeLimitSOC + "%"));
-
-    var rangeCompare = document.createElement("li");
-    rangeCompare.className = "mattribute";
-    rangeCompare.appendChild(makeSpan("icon zmdi zmdi-car zmdi-hc-fw", ""));
-//    rangeCompare.appendChild(makeSpan("name", "Ideal v. Est. Range"));
-    rangeCompare.appendChild(makeSpan("name", "Ideal Range"));
-    rangeCompare.appendChild(makeSpan("value", idealRange + (!this.config.imperial ? " Km" : " Mi")));
-
-    attrList.appendChild(batteryLi)
-    attrList.appendChild(maxBatteryLi);
-    attrList.appendChild(rangeCompare);
+    //attrList.appendChild(rangeCompare);
 
     if (charging) {
       var energyAddedLi = document.createElement("li");
@@ -317,9 +263,16 @@ Module.register("MMM-Teslamate", {
       timeToFullLi.className = "mattribute";
       timeToFullLi.appendChild(makeSpan("icon zmdi zmdi-time zmdi-hc-fw", ""));
       timeToFullLi.appendChild(makeSpan("name", "Time to " + chargeLimitSOC + "%"));
-      timeToFullLi.appendChild(makeSpan("value", timeToFull + " Hours"));
+      timeToFullLi.appendChild(makeSpan("value", makeChargeRemString(timeToFull)));
       attrList.appendChild(energyAddedLi);
       attrList.appendChild(timeToFullLi);
+    } else if (pluggedIn) { 
+      var chargeStartLi = document.createElement("li");
+      chargeStartLi.className = "mattribute";
+      chargeStartLi.appendChild(makeSpan("icon zmdi zmdi-time zmdi-hc-fw", ""));
+      chargeStartLi.appendChild(makeSpan("name", "Charge Starting"));
+      chargeStartLi.appendChild(makeSpan("value", makeChargeStartString(chargeStart)));
+      attrList.appendChild(chargeStartLi);
     }
 
     var odometerLi = document.createElement("li");
