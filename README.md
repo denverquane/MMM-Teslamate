@@ -8,8 +8,8 @@ Big thanks to [olexs](https://github.com/olexs) for this mode!
 
 ## Hybrid Mode
 
-![Teslamate_ChargingM3.png](doc/charging.png)
-![Teslamate_ScheduledChargingM3.png](doc/charge_starting.png)
+![Teslamate_ChargingM3.png](doc/charging.PNG)
+![Teslamate_ScheduledChargingM3.png](doc/charge_starting.PNG)
 
 Also many thanks to [adriankumpf](https://github.com/adriankumpf) for their incredible work on the [Teslamate](https://github.com/adriankumpf/teslamate) project,
 as well as [aduyng](https://github.com/aduyng) for their [TeslaStatus](https://github.com/aduyng/MMM-TeslaStatus) module used as a template!
