@@ -2,9 +2,14 @@
 ## Magic Mirror Module for the Teslamate utility
 
 ## Graphic Mode
-![Teslamate_GraphicModel3.png](doc/graphic_m3.png)
+![Teslamate_GraphicM3.png](doc/graphic_m3.png)
 
 Big thanks to [olexs](https://github.com/olexs) for this mode!
+
+## Hybrid Mode
+
+![Teslamate_ChargingM3.png](doc/charging.png)
+![Teslamate_ScheduledChargingM3.png](doc/charge_starting.png)
 
 Also many thanks to [adriankumpf](https://github.com/adriankumpf) for their incredible work on the [Teslamate](https://github.com/adriankumpf/teslamate) project,
 as well as [aduyng](https://github.com/aduyng) for their [TeslaStatus](https://github.com/aduyng/MMM-TeslaStatus) module used as a template!
@@ -65,9 +70,9 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
 * Some fields (charge added, time to full charge) are currently only enabled if the vehicle is plugged in
 
 ## Ongoing work
-* ~~Add images of module~~
-* Add support to selectively enable/disable certain lines
-* ~~Selectively enable/disable certain fields based on other state (for example, still show scheduled charge time if plugged in)~~
 * Display Teslamate "status" topic
+* Add support to selectively enable/disable certain lines
+* ~~Add images of module~~
+* ~~Selectively enable/disable certain fields based on other state (for example, still show scheduled charge time if plugged in)~~
 * ~~Format and display Teslamate "scheduled charge time" topic~~
 * ~~Proper Imperial/Metric conversion and formatting~~

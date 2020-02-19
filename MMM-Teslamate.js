@@ -230,7 +230,7 @@ Module.register("MMM-Teslamate", {
     //TODO bother formatting days? Poor trickle chargers...
     const makeChargeRemString = function (remHrs) {
       const hrs = Math.floor(remHrs);
-      const mins = (remHrs - hrs) * 60.0;
+      const mins = Math.ceil((remHrs - hrs) * 60.0);
 
       return (hrs > 0 ? (hrs + " Hour"+ (hrs > 1 ? "s" : "") + ", ") : "") + (mins > 0 ? (mins + " Min" + (mins > 1 ? "s" : "")) : "");
       
