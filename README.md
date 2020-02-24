@@ -46,6 +46,15 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
         // set to true to enable both the graphic, and the additional stats 
         // (charge remaining, scheduled charge start, etc)
         hybridView: true,
+        // size of the visible area
+        sizeOptions: {
+            // size of the icons + battery (above text)
+            width: 450, // px, default: 450
+            height: 203, // px, default: 203
+            // the battery images itself
+            batWitdh: 250, // px, default: 250
+            batHeight: 75, // px, default: 75
+        },
         carImageOptions: {
             model: "m3", // mx, ms (S pre-refresh), ? (S post-refresh)
 

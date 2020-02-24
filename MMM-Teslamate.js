@@ -146,7 +146,7 @@ Module.register("MMM-Teslamate", {
     const isHealthy = this.subscriptions["health"].value;
 
     //const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
-
+ 
     var idealRange = this.subscriptions["ideal_range"].value ? this.subscriptions["ideal_range"].value : 0;
     var estRange = this.subscriptions["est_range"].value ? this.subscriptions["est_range"].value : 0;
     var speed = this.subscriptions["speed"].value ? this.subscriptions["speed"].value : 0;
@@ -316,11 +316,24 @@ Module.register("MMM-Teslamate", {
       networkIcons.push("alert-box");
     networkIcons.push((state == "offline") ? "signal-off" : "signal");
 
+    // size options 
+    // size of the icons + battery (above text)
+    const layWitdh = this.config.sizeOptions.width || 450; // px, default: 450
+    const layHeight = this.config.sizeOptions.height || 203; // px, default: 203
+    // the battery images itself
+    const layBatWitdh = this.config.sizeOptions.batWitdh || 250; // px, default: 250
+    const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
+
+    // calculate scales
+    var layBatScaleWitdh = layBatWitdh/250;  // scale factor normalized to 250
+    var layBatScaleHeight = layBatHeight/75; // scale factor normalized to 75
+    var layScaleHeight = layHeight/203; // scale factor normalized to 203
+
     const teslaModel = this.config.carImageOptions.model || "m3";
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
     const teslaOptions = this.config.carImageOptions.options || "PPSW,W32B,SLR1";
-
-    const teslaImageUrl = `https://static-assets.tesla.com/v1/compositor/?model=${teslaModel}&view=${teslaView}&size=450&options=${teslaOptions}&bkba_opt=1`;
+    
+    const teslaImageUrl = `https://static-assets.tesla.com/v1/compositor/?model=${teslaModel}&view=${teslaView}&size=${layWitdh}&options=${teslaOptions}&bkba_opt=1`;
     const imageOffset = this.config.carImageOptions.verticalOffset || 0;
     const imageOpacity = this.config.carImageOptions.imageOpacity || 0.4;
 
@@ -333,11 +346,12 @@ Module.register("MMM-Teslamate", {
                                batteryReserveVisible ? `<span class="mdi mdi-snowflake bright light"></span>` :
                                '';
 
+    
     wrapper.innerHTML = `
-      <div style="width: 450px; height: 253px;">
+      <div style="width: ${layWitdh}px; height: ${layHeight}px;">
         <link href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"> 
         <div style="z-index: 1; position: absolute; top: 0px; left: 0px; 
-                    width: 450px; height: 253px; 
+                    width: ${layWitdh}px; height: ${layHeight}px; 
                     opacity: ${imageOpacity}; 
                     background-image: url('${teslaImageUrl}'); 
                     background-position: 0px ${imageOffset}px;
@@ -346,73 +360,75 @@ Module.register("MMM-Teslamate", {
         <div style="z-index: 2; position: absolute; top: 0px; left: 0px;">
 
           <!-- Percentage/range -->
-          <div style="margin-top: 50px; margin-left: auto; text-align: center; width: 450px; height: 70px">
+          <div style="margin-top: ${50*layScaleHeight}px; margin-left: auto; text-align: center; width: ${layWitdh}px; height: 70px">
             <span class="bright large light">${batteryUsable}</span><span class="normal medium">%</span>
           </div>
 
           <!-- State icons -->
-          <div style="float: left; margin-top: -65px; margin-left: 95px; text-align: left; ${ state == "offline" ? 'opacity: 0.3;' : '' }" class="small">
+          <div style="float: left; margin-top: -${65*layScaleHeight}px; margin-left: ${((layWitdh-layBatWitdh)/2)-5}px; text-align: left; ${ state == "offline" ? 'opacity: 0.3;' : '' }" class="small">
             ${ renderedStateIcons.join(" ") }
           </div>
 
           <!-- Online state icon -->
-          <div style="float: right; margin-top: -65px; margin-right: 95px; text-align: right;" class="small">
+          <div style="float: right; margin-top: -${65*layScaleHeight}px; margin-right: ${((layWitdh-layBatWitdh)/2)-5}px; text-align: right;" class="small">
             ${ renderedNetworkIcons.join(" ") }
           </div>
 
           <!-- Battery graphic - outer border -->
-          <div style="margin-left: 100px; 
-                      width: 250px; height: 75px;
+          <div style="margin-left: ${(layWitdh-layBatWitdh)/2}px; 
+                      width: ${layBatWitdh}px; height: ${layBatHeight}px;
                       border: 2px solid #aaa;
-                      border-radius: 10px">
+                      border-radius: ${10*layBatScaleHeight}px">
 
             <!-- Plus pole -->
-            <div style="position: relative; top: 27px; left: 250px;
-                        width: 8px; height: 19px;
+            <div style="position: relative; top: ${(layBatHeight-layBatHeight/4)/2 -1}px; left: ${layBatWitdh}px;
+                        width: ${8*layBatScaleWitdh}px; height: ${layBatHeight/4}px;
                         border: 2px solid #aaa;
-                        border-top-right-radius: 5px;
-                        border-bottom-right-radius: 5px;
+                        border-top-right-radius: ${5*layBatScaleHeight}px;
+                        border-bottom-right-radius: ${5*layBatScaleHeight}px;
                         border-left: none;
                         background: #000">
-                <div style="width: 8px; height: 19px;
+                <div style="width: ${8*layBatScaleWitdh}px; height: ${layBatHeight/4}px;
                             opacity: ${imageOpacity};
                             background-image: url('${teslaImageUrl}'); 
                             background-position: -351px ${imageOffset-152}px""></div>
             </div>
 
             <!-- Inner border -->
-            <div style="position: relative; top: -23px; left: 0px; margin: 5px;
-                        width: 238px; height: 63px;
+            <div style="position: relative; top: -${23*layBatScaleHeight}px; left: 0px; 
+	                margin-left: 5px;
+			margin-top: ${5*layBatScaleHeight}px;
+                        width: ${(layBatWitdh-12)}px; height: ${layBatHeight - 8 - 2 - 2}px;
                         border: 1px solid #aaa;
-                        border-radius: 3px">
+                        border-radius: ${3*layBatScaleHeight}px">
 
               <!-- Green charge rectangle -->
               <div style="position: relative; top: 0px; left: 0px; z-index: 2;
-                          width: ${Math.round(2.38 * batteryUsable)}px;
-                          height: 63px;
+                          width: ${Math.round(layBatScaleWitdh * 2.38 * batteryUsable)}px;
+                          height: ${layBatHeight - 8 - 2 - 2}px;
                           opacity: 0.8;
-                          border-top-left-radius: 2.5px;
-                          border-bottom-left-radius: 2.5px;
+                          border-top-left-radius: ${2.5*layBatScaleHeight}px;
+                          border-bottom-left-radius: ${2.5*layBatScaleHeight}px;
                           background-color: #068A00"></div>
 
               <!-- Blue reserved charge rectangle -->
-              <div style="position: relative; top: -63px; left: ${Math.round(2.38 * batteryUsable)}px; z-index: 2;
-                          width: ${Math.round(2.38 * (battery - batteryUsable))}px;
+              <div style="position: relative; top: -${layBatHeight - 8 - 2 - 2}px; left: ${Math.round(layBatScaleWitdh * 2.38 * batteryUsable)}px; z-index: 2;
+                          width: ${Math.round(layBatScaleWitdh * 2.38 * (battery - batteryUsable))}px;
                           visibility: ${batteryReserveVisible ? 'visible' : 'hidden'};
-                          height: 63px;
+                          height: ${layBatHeight - 8 - 2 - 2}px;
                           opacity: 0.8;
                           border-top-left-radius: 2.5px;
                           border-bottom-left-radius: 2.5px;
                           background-color: #366aa5"></div>
 
               <!-- Charge limit marker -->
-              <div style="position: relative; top: -126px; left: ${Math.round(2.38 * chargeLimitSOC)-1}px;
-                          height: 63px; width: 2px;
+              <div style="position: relative; top: -${(layBatHeight - 8 - 2 - 2)*2}px; left: ${Math.round(layBatScaleWitdh * 2.38 * chargeLimitSOC)-1}px;
+                          height: ${layBatHeight - 8 - 2 - 2}px; width: 2px;
                           ${chargeLimitSOC === 0 ? "visibility: hidden" : ""}
                           border-left: 1px dashed #888"></div>
                           
               <!-- Battery overlay icon (charging or snowflake) -->
-              <div style="position: relative; top: -182px; left: 0; text-align: center; z-index: 5">
+              <div style="position: relative; top: -${(layBatHeight - 8*layBatScaleHeight - 2 - 2)*2 + 56*layBatScaleHeight}px; left: 0; text-align: center; z-index: 5">
                 ${batteryOverlayIcon}
               </div>
               
