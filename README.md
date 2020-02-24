@@ -49,7 +49,7 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
         // size of the visible area
         sizeOptions: {
             // size of the icons + battery (above text)
-            witdh: 450, // px, default: 450
+            width: 450, // px, default: 450
             height: 203, // px, default: 203
             // the battery images itself
             batWitdh: 250, // px, default: 250

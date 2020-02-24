@@ -318,7 +318,7 @@ Module.register("MMM-Teslamate", {
 
     // size options 
     // size of the icons + battery (above text)
-    const layWitdh = this.config.sizeOptions.witdh || 450; // px, default: 450
+    const layWitdh = this.config.sizeOptions.width || 450; // px, default: 450
     const layHeight = this.config.sizeOptions.height || 203; // px, default: 203
     // the battery images itself
     const layBatWitdh = this.config.sizeOptions.batWitdh || 250; // px, default: 250
