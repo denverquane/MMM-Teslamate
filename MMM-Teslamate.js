@@ -318,14 +318,14 @@ Module.register("MMM-Teslamate", {
 
     // size options 
     // size of the icons + battery (above text)
-    const layWitdh = this.config.sizeOptions.width || 450; // px, default: 450
+    const layWidth = this.config.sizeOptions.width || 450; // px, default: 450
     const layHeight = this.config.sizeOptions.height || 203; // px, default: 203
     // the battery images itself
-    const layBatWitdh = this.config.sizeOptions.batWitdh || 250; // px, default: 250
+    const layBatWidth = this.config.sizeOptions.batWidth || 250; // px, default: 250
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
 
     // calculate scales
-    var layBatScaleWitdh = layBatWitdh/250;  // scale factor normalized to 250
+    var layBatScaleWidth = layBatWidth/250;  // scale factor normalized to 250
     var layBatScaleHeight = layBatHeight/75; // scale factor normalized to 75
     var layScaleHeight = layHeight/203; // scale factor normalized to 203
 
@@ -333,7 +333,7 @@ Module.register("MMM-Teslamate", {
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
     const teslaOptions = this.config.carImageOptions.options || "PPSW,W32B,SLR1";
     
-    const teslaImageUrl = `https://static-assets.tesla.com/v1/compositor/?model=${teslaModel}&view=${teslaView}&size=${layWitdh}&options=${teslaOptions}&bkba_opt=1`;
+    const teslaImageUrl = `https://static-assets.tesla.com/v1/compositor/?model=${teslaModel}&view=${teslaView}&size=${layWidth}&options=${teslaOptions}&bkba_opt=1`;
     const imageOffset = this.config.carImageOptions.verticalOffset || 0;
     const imageOpacity = this.config.carImageOptions.imageOpacity || 0.4;
 
@@ -348,10 +348,10 @@ Module.register("MMM-Teslamate", {
 
     
     wrapper.innerHTML = `
-      <div style="width: ${layWitdh}px; height: ${layHeight}px;">
+      <div style="width: ${layWidth}px; height: ${layHeight}px;">
         <link href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"> 
         <div style="z-index: 1; position: absolute; top: 0px; left: 0px; 
-                    width: ${layWitdh}px; height: ${layHeight}px; 
+                    width: ${layWidth}px; height: ${layHeight}px; 
                     opacity: ${imageOpacity}; 
                     background-image: url('${teslaImageUrl}'); 
                     background-position: 0px ${imageOffset}px;
@@ -360,35 +360,35 @@ Module.register("MMM-Teslamate", {
         <div style="z-index: 2; position: absolute; top: 0px; left: 0px;">
 
           <!-- Percentage/range -->
-          <div style="margin-top: ${50*layScaleHeight}px; margin-left: auto; text-align: center; width: ${layWitdh}px; height: 70px">
+          <div style="margin-top: ${50*layScaleHeight}px; margin-left: auto; text-align: center; width: ${layWidth}px; height: 70px">
             <span class="bright large light">${batteryUsable}</span><span class="normal medium">%</span>
           </div>
 
           <!-- State icons -->
-          <div style="float: left; margin-top: -${65*layScaleHeight}px; margin-left: ${((layWitdh-layBatWitdh)/2)-5}px; text-align: left; ${ state == "offline" ? 'opacity: 0.3;' : '' }" class="small">
+          <div style="float: left; margin-top: -${65*layScaleHeight}px; margin-left: ${((layWidth-layBatWidth)/2)-5}px; text-align: left; ${ state == "offline" ? 'opacity: 0.3;' : '' }" class="small">
             ${ renderedStateIcons.join(" ") }
           </div>
 
           <!-- Online state icon -->
-          <div style="float: right; margin-top: -${65*layScaleHeight}px; margin-right: ${((layWitdh-layBatWitdh)/2)-5}px; text-align: right;" class="small">
+          <div style="float: right; margin-top: -${65*layScaleHeight}px; margin-right: ${((layWidth-layBatWidth)/2)-5}px; text-align: right;" class="small">
             ${ renderedNetworkIcons.join(" ") }
           </div>
 
           <!-- Battery graphic - outer border -->
-          <div style="margin-left: ${(layWitdh-layBatWitdh)/2}px; 
-                      width: ${layBatWitdh}px; height: ${layBatHeight}px;
+          <div style="margin-left: ${(layWidth-layBatWidth)/2}px; 
+                      width: ${layBatWidth}px; height: ${layBatHeight}px;
                       border: 2px solid #aaa;
                       border-radius: ${10*layBatScaleHeight}px">
 
             <!-- Plus pole -->
-            <div style="position: relative; top: ${(layBatHeight-layBatHeight/4)/2 -1}px; left: ${layBatWitdh}px;
-                        width: ${8*layBatScaleWitdh}px; height: ${layBatHeight/4}px;
+            <div style="position: relative; top: ${(layBatHeight-layBatHeight/4)/2 -1}px; left: ${layBatWidth}px;
+                        width: ${8*layBatScaleWidth}px; height: ${layBatHeight/4}px;
                         border: 2px solid #aaa;
                         border-top-right-radius: ${5*layBatScaleHeight}px;
                         border-bottom-right-radius: ${5*layBatScaleHeight}px;
                         border-left: none;
                         background: #000">
-                <div style="width: ${8*layBatScaleWitdh}px; height: ${layBatHeight/4}px;
+                <div style="width: ${8*layBatScaleWidth}px; height: ${layBatHeight/4}px;
                             opacity: ${imageOpacity};
                             background-image: url('${teslaImageUrl}'); 
                             background-position: -351px ${imageOffset-152}px""></div>
@@ -398,13 +398,13 @@ Module.register("MMM-Teslamate", {
             <div style="position: relative; top: -${23*layBatScaleHeight}px; left: 0px; 
 	                margin-left: 5px;
 			margin-top: ${5*layBatScaleHeight}px;
-                        width: ${(layBatWitdh-12)}px; height: ${layBatHeight - 8 - 2 - 2}px;
+                        width: ${(layBatWidth-12)}px; height: ${layBatHeight - 8 - 2 - 2}px;
                         border: 1px solid #aaa;
                         border-radius: ${3*layBatScaleHeight}px">
 
               <!-- Green charge rectangle -->
               <div style="position: relative; top: 0px; left: 0px; z-index: 2;
-                          width: ${Math.round(layBatScaleWitdh * 2.38 * batteryUsable)}px;
+                          width: ${Math.round(layBatScaleWidth * 2.38 * batteryUsable)}px;
                           height: ${layBatHeight - 8 - 2 - 2}px;
                           opacity: 0.8;
                           border-top-left-radius: ${2.5*layBatScaleHeight}px;
@@ -412,8 +412,8 @@ Module.register("MMM-Teslamate", {
                           background-color: #068A00"></div>
 
               <!-- Blue reserved charge rectangle -->
-              <div style="position: relative; top: -${layBatHeight - 8 - 2 - 2}px; left: ${Math.round(layBatScaleWitdh * 2.38 * batteryUsable)}px; z-index: 2;
-                          width: ${Math.round(layBatScaleWitdh * 2.38 * (battery - batteryUsable))}px;
+              <div style="position: relative; top: -${layBatHeight - 8 - 2 - 2}px; left: ${Math.round(layBatScaleWidth * 2.38 * batteryUsable)}px; z-index: 2;
+                          width: ${Math.round(layBatScaleWidth * 2.38 * (battery - batteryUsable))}px;
                           visibility: ${batteryReserveVisible ? 'visible' : 'hidden'};
                           height: ${layBatHeight - 8 - 2 - 2}px;
                           opacity: 0.8;
@@ -422,7 +422,7 @@ Module.register("MMM-Teslamate", {
                           background-color: #366aa5"></div>
 
               <!-- Charge limit marker -->
-              <div style="position: relative; top: -${(layBatHeight - 8 - 2 - 2)*2}px; left: ${Math.round(layBatScaleWitdh * 2.38 * chargeLimitSOC)-1}px;
+              <div style="position: relative; top: -${(layBatHeight - 8 - 2 - 2)*2}px; left: ${Math.round(layBatScaleWidth * 2.38 * chargeLimitSOC)-1}px;
                           height: ${layBatHeight - 8 - 2 - 2}px; width: 2px;
                           ${chargeLimitSOC === 0 ? "visibility: hidden" : ""}
                           border-left: 1px dashed #888"></div>
