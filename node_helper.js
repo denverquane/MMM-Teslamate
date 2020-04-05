@@ -1,45 +1,49 @@
 var mqtt = require('mqtt');
 var NodeHelper = require("node_helper");
-const Topics = {
-    name: 'teslamate/cars/1/display_name',
-    state: 'teslamate/cars/1/state',
-    health: 'teslamate/cars/1/healthy',
-  
-    lat: 'teslamate/cars/1/latitude',
-    lon: 'teslamate/cars/1/longitude',
-    shift_state: 'teslamate/cars/1/shift_state',
-    speed: 'teslamate/cars/1/speed',
-  
-    locked: 'teslamate/cars/1/locked',
-    sentry: 'teslamate/cars/1/sentry_mode',
-    windows: 'teslamate/cars/1/windows_open',
-    
-    outside_temp: 'teslamate/cars/1/outside_temp',
-    inside_temp: 'teslamate/cars/1/inside_temp',
-    climate_on: 'teslamate/cars/1/is_climate_on',
-  
-    odometer: 'teslamate/cars/1/odometer',
-    ideal_range: 'teslamate/cars/1/ideal_battery_range_km',
-    est_range: 'teslamate/cars/1/est_battery_range_km',
-    rated_range: 'teslamate/cars/1/rated_battery_range_km',
-  
-    battery: 'teslamate/cars/1/battery_level',
-    battery_usable: 'teslamate/cars/1/usable_battery_level',
-    plugged_in: 'teslamate/cars/1/plugged_in',
-    charge_added: 'teslamate/cars/1/charge_energy_added',
-    charge_limit: 'teslamate/cars/1/charge_limit_soc',
+const topicPrefix = 'teslamate/cars/';
+
+var globalServer = {};
+
+module.exports = NodeHelper.create({
+
+    makeTopics: function (carID) {
+      return {
+    name: topicPrefix + carID + '/display_name',
+    state: topicPrefix + carID + '/state',
+    health: topicPrefix + carID + '/healthy',
+
+    lat: topicPrefix + carID + '/latitude',
+    lon: topicPrefix + carID + '/longitude',
+    shift_state: topicPrefix + carID + '/shift_state',
+    speed: topicPrefix + carID + '/speed',
+
+    locked: topicPrefix + carID + '/locked',
+    sentry: topicPrefix + carID + '/sentry_mode',
+    windows: topicPrefix + carID + '/windows_open',
+
+    outside_temp: topicPrefix + carID + '/outside_temp',
+    inside_temp: topicPrefix + carID + '/inside_temp',
+    climate_on: topicPrefix + carID + '/is_climate_on',
+
+    odometer: topicPrefix + carID + '/odometer',
+    ideal_range: topicPrefix + carID + '/ideal_battery_range_km',
+    est_range: topicPrefix + carID + '/est_battery_range_km',
+    rated_range: topicPrefix + carID + '/rated_battery_range_km',
+
+    battery: topicPrefix + carID + '/battery_level',
+    battery_usable: topicPrefix + carID + '/usable_battery_level',
+    plugged_in: topicPrefix + carID + '/plugged_in',
+    charge_added: topicPrefix + carID + '/charge_energy_added',
+    charge_limit: topicPrefix + carID + '/charge_limit_soc',
     // charge_port: 'teslamate/cars/1/charge_port_door_open',
     // charge_current: 'teslamate/cars/1/charger_actual_current',
     // charge_phases: 'teslamate/cars/1/charger_phases',
     // charge_power: 'teslamate/cars/1/charger_power',
     // charge_voltage: 'teslamate/cars/1/charger_voltage',
-    charge_start: 'teslamate/cars/1/scheduled_charging_start_time',
-    charge_time: 'teslamate/cars/1/time_to_full_charge',
-};
-
-var globalServer = {};
-
-module.exports = NodeHelper.create({
+    charge_start: topicPrefix + carID + '/scheduled_charging_start_time',
+    charge_time:  topicPrefix + carID + '/time_to_full_charge',
+      };
+    },
 
     start: function () {
         console.log(this.name + ': Starting node helper');
@@ -50,7 +54,8 @@ module.exports = NodeHelper.create({
         return '' + server.address + ':' + (server.port | '1883' + server.user);
     },
 
-    addServer: function (server) {
+    addServer: function (server, carID) {
+        var Topics = this.makeTopics(carID);
         console.log(this.name + ': Adding server: ', server);
         var serverKey = this.makeServerKey(server);
         var mqttServer = {}
@@ -77,7 +82,7 @@ module.exports = NodeHelper.create({
 
     addConfig: function (config) {
         console.log('Adding config');
-        this.addServer(config.mqttServer);
+        this.addServer(config.mqttServer, config.carID);
     },
 
     startClient: function (server) {
