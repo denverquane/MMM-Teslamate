@@ -34,41 +34,49 @@ Module.register("MMM-Teslamate", {
     const topicPrefix = 'teslamate/cars/' + this.config.carID;
 
     const Topics = {
-  name: topicPrefix + '/display_name',
-  state: topicPrefix + '/state',
-  health: topicPrefix + '/healthy',
+      name: topicPrefix + '/display_name',
+      state: topicPrefix + '/state',
+      health: topicPrefix + '/healthy',
 
-  lat: topicPrefix + '/latitude',
-  lon: topicPrefix + '/longitude',
-  shift_state: topicPrefix + '/shift_state',
-  speed: topicPrefix + '/speed',
+      lat: topicPrefix + '/latitude',
+      lon: topicPrefix + '/longitude',
+      shift_state: topicPrefix + '/shift_state',
+      speed: topicPrefix + '/speed',
 
-  locked: topicPrefix + '/locked',
-  sentry: topicPrefix + '/sentry_mode',
-  windows: topicPrefix + '/windows_open',
+      locked: topicPrefix + '/locked',
+      sentry: topicPrefix + '/sentry_mode',
+      windows: topicPrefix + '/windows_open',
+      doors: topicPrefix + '/doors_open',
+      trunk: topicPrefix + '/trunk_open',
+      frunk: topicPrefix + '/frunk_open',
+      user: topicPrefix + '/is_user_present',
 
-  outside_temp: topicPrefix + '/outside_temp',
-  inside_temp: topicPrefix + '/inside_temp',
-  climate_on: topicPrefix + '/is_climate_on',
+      outside_temp: topicPrefix + '/outside_temp',
+      inside_temp: topicPrefix + '/inside_temp',
+      climate_on: topicPrefix + '/is_climate_on',
+      preconditioning: topicPrefix + '/is_preconditioning',
 
-  odometer: topicPrefix + '/odometer',
-  ideal_range: topicPrefix + '/ideal_battery_range_km',
-  est_range: topicPrefix + '/est_battery_range_km',
-  rated_range: topicPrefix + '/rated_battery_range_km',
+      odometer: topicPrefix + '/odometer',
+      ideal_range: topicPrefix + '/ideal_battery_range_km',
+      est_range: topicPrefix + '/est_battery_range_km',
+      rated_range: topicPrefix + '/rated_battery_range_km',
 
-  battery: topicPrefix + '/battery_level',
-  battery_usable: topicPrefix + '/usable_battery_level',
-  plugged_in: topicPrefix + '/plugged_in',
-  charge_added: topicPrefix + '/charge_energy_added',
-  charge_limit: topicPrefix + '/charge_limit_soc',
-  // charge_port: 'teslamate/cars/1/charge_port_door_open',
-  // charge_current: 'teslamate/cars/1/charger_actual_current',
-  // charge_phases: 'teslamate/cars/1/charger_phases',
-  // charge_power: 'teslamate/cars/1/charger_power',
-  // charge_voltage: 'teslamate/cars/1/charger_voltage',
-  charge_start: topicPrefix + '/scheduled_charging_start_time',
-  charge_time: topicPrefix + '/time_to_full_charge',
-};
+      battery: topicPrefix + '/battery_level',
+      battery_usable: topicPrefix + '/usable_battery_level',
+      plugged_in: topicPrefix + '/plugged_in',
+      charge_added: topicPrefix + '/charge_energy_added',
+      charge_limit: topicPrefix + '/charge_limit_soc',
+      // charge_port: 'teslamate/cars/1/charge_port_door_open',
+      // charge_current: 'teslamate/cars/1/charger_actual_current',
+      // charge_phases: 'teslamate/cars/1/charger_phases',
+      // charge_power: 'teslamate/cars/1/charger_power',
+      // charge_voltage: 'teslamate/cars/1/charger_voltage',
+      charge_start: topicPrefix + '/scheduled_charging_start_time',
+      charge_time: topicPrefix + '/time_to_full_charge',
+
+      update_available: topicPrefix + '/update_available',
+    };
+
     console.log(this.name + ' started.');
     this.subscriptions = {
       lat: {},
@@ -104,7 +112,7 @@ Module.register("MMM-Teslamate", {
   socketNotificationReceived: function (notification, payload) {
     if (notification === 'MQTT_PAYLOAD') {
       if (payload != null) {
-	for (let key in this.subscriptions) {
+	      for (let key in this.subscriptions) {
           sub = this.subscriptions[key];
           //console.log(sub);
           if (sub.serverKey == payload.serverKey && sub.topic == payload.topic) {
@@ -115,7 +123,7 @@ Module.register("MMM-Teslamate", {
             this.subscriptions[key] = sub;
           }
         }
-	  this.updateDom();
+	      this.updateDom();
       } else {
         console.log(this.name + ': MQTT_PAYLOAD - No payload');
       }
@@ -149,8 +157,14 @@ Module.register("MMM-Teslamate", {
     const locked = this.subscriptions["locked"].value;
     const sentry = this.subscriptions["sentry"].value;
     const windowsOpen = this.subscriptions["windows"].value;
+    const doorsOpen = this.subscriptions["doors"].value;
+    const trunkOpen = this.subscriptions["trunk"].value;
+    const frunkOpen = this.subscriptions["frunk"].value;
+    const isUserPresent = this.subscriptions["user"].value;
     const isClimateOn = this.subscriptions["climate_on"].value;
+    const isPreconditioning = this.subscriptions["preconditioning"].value;
     const isHealthy = this.subscriptions["health"].value;
+    const isUpdateAvailable = this.subscriptions["update_available"].value;
 
     //const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
 
@@ -183,7 +197,9 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen, batteryUsable, isClimateOn, isHealthy, charging
+      windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
+      doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
+      isPreconditioning
     }
 
     //always graphic mode
@@ -201,7 +217,9 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen, batteryUsable, isClimateOn, isHealthy, charging
+      windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
+      doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
+      isPreconditioning
     } = data;
 
     //const getBatteryLevelClass = function (bl, warn, danger) {
@@ -296,7 +314,9 @@ Module.register("MMM-Teslamate", {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
-      windowsOpen, batteryUsable, isClimateOn, isHealthy, charging
+      windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
+      doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
+      isPreconditioning
     } = data;
 
     const stateIcons = [];
@@ -304,6 +324,8 @@ Module.register("MMM-Teslamate", {
       stateIcons.push("power-sleep");
     if (state == "suspended")
       stateIcons.push("timer-sand");
+    if (state == "driving")
+      stateIcons.push("steering");
     if (pluggedIn == "true")
       stateIcons.push("power-plug");
     if (locked == "false")
@@ -312,12 +334,18 @@ Module.register("MMM-Teslamate", {
       stateIcons.push("cctv");
     if (windowsOpen == "true")
       stateIcons.push("window-open");
-    if (isClimateOn == "true")
+    if (isUserPresent == "true")
+      stateIcons.push("account");
+    if (doorsOpen == "true" || trunkOpen == "true" || frunkOpen == "true")
+      stateIcons.push("car-door");
+    if (isClimateOn == "true" || isPreconditioning == "true")
       stateIcons.push("air-conditioner");
 
     const networkIcons = [];
     if (state == "updating")
       networkIcons.push("cog-clockwise");
+    else if (isUpdateAvailable == "true")
+      networkIcons.push("gift");
     if (isHealthy != "true")
       networkIcons.push("alert-box");
     networkIcons.push((state == "offline") ? "signal-off" : "signal");
