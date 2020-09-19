@@ -1,10 +1,7 @@
 Module.register("MMM-Teslamate", {
 
   getScripts: function () {
-    return [
-      'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js',
-    ];
+    return [];
   },
   getStyles: function () {
     return [
