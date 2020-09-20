@@ -41,11 +41,13 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
             //user: 'user',          // Leave out for no user
             //password: 'password',  // Leave out for no password
         },
-        imperial: true, // use imperial units (false = Miles & F) or metric (true = Km & C)
+
+        rangeDisplay: "%", // "%" or "range"
+        imperial: false, //use imperial units (true = Miles & F) or metric (false = Km & C)
 
         carID: '1', // defaults to '1'; only override if you have multiple Teslas and want to display 
                     // a specific car per instance of the module
-        
+
         // set to true to enable both the graphic, and the additional stats 
         // (charge remaining, scheduled charge start, etc)
         hybridView: true,
