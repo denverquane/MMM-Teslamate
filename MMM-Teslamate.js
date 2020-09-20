@@ -13,6 +13,7 @@ Module.register("MMM-Teslamate", {
   // Default module config
   defaults: {
     mqttServer: {},
+    rangeDisplay: "%",
     imperial: false,
     carID: '1',
     sizeOptions: {
@@ -377,6 +378,9 @@ Module.register("MMM-Teslamate", {
                                batteryReserveVisible ? `<span class="mdi mdi-snowflake bright light"></span>` :
                                '';
 
+    const batteryBigNumber = this.config.rangeDisplay === "%" ? batteryUsable : idealRange;
+    const batteryUnit = this.config.rangeDisplay === "%" ? "%" : (this.config.imperial ? "mi" : "km");
+
 
     wrapper.innerHTML = `
       <div style="width: ${layWidth}px; height: ${layHeight}px;">
@@ -394,7 +398,7 @@ Module.register("MMM-Teslamate", {
                       text-align: center; 
                       width: ${layWidth}px; 
                       height: 70px">
-            <span class="bright large light">${batteryUsable}</span><span class="normal medium">%</span>
+            <span class="bright large light">${batteryBigNumber}</span><span class="normal medium">${batteryUnit}</span>
           </div>
 
           <!-- State icons -->
