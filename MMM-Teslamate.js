@@ -17,11 +17,11 @@ Module.register("MMM-Teslamate", {
     imperial: false,
     carID: '1',
     sizeOptions: {
-     width: 450,
-     height: 203,
-     batWidth: 250,
-     betHeight: 75,
-   },
+      width: 450,
+      height: 203,
+      batWidth: 250,
+      betHeight: 75,
+    },
   },
 
   makeServerKey: function (server) {
@@ -110,7 +110,7 @@ Module.register("MMM-Teslamate", {
   socketNotificationReceived: function (notification, payload) {
     if (notification === 'MQTT_PAYLOAD') {
       if (payload != null) {
-	      for (let key in this.subscriptions) {
+        for (let key in this.subscriptions) {
           sub = this.subscriptions[key];
           //console.log(sub);
           if (sub.serverKey == payload.serverKey && sub.topic == payload.topic) {
@@ -121,7 +121,7 @@ Module.register("MMM-Teslamate", {
             this.subscriptions[key] = sub;
           }
         }
-	      this.updateDom();
+        this.updateDom();
       } else {
         console.log(this.name + ': MQTT_PAYLOAD - No payload');
       }
@@ -130,11 +130,11 @@ Module.register("MMM-Teslamate", {
 
   getDom: function () {
     const kmToMiFixed = function (miles, fixed) {
-      return (miles / 1.609).toFixed(fixed);
+      return (miles / 1.609344).toFixed(fixed);
     };
 
     const cToFFixed = function (celcius, fixed) {
-      return ((celcius * 9/5) + 32).toFixed(fixed);
+      return ((celcius * 9 / 5) + 32).toFixed(fixed);
     };
     const wrapper = document.createElement('div');
 
@@ -210,7 +210,7 @@ Module.register("MMM-Teslamate", {
     return wrapper;
   },
 
-  generateTableDom: function(wrapper, data) {
+  generateTableDom: function (wrapper, data) {
     const {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry,
@@ -233,7 +233,7 @@ Module.register("MMM-Teslamate", {
     //  return '';
     //};
 
-    const makeSpan = function(className, content) {
+    const makeSpan = function (className, content) {
       var span = document.createElement("span");
       span.className = className;
       span.innerHTML = content;
@@ -246,7 +246,7 @@ Module.register("MMM-Teslamate", {
       var diffHrs = Math.floor((diffMs % 86400000) / 3600000);
       var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
       var returnStr = (diffDays > 0 ? (diffDays + " Days, ") : "");
-      returnStr += (diffHrs > 0 ? (diffHrs + " Hour"+ (diffHrs > 1 ? "s" : "") + ", ") : "");
+      returnStr += (diffHrs > 0 ? (diffHrs + " Hour" + (diffHrs > 1 ? "s" : "") + ", ") : "");
       return returnStr + (diffMins > 0 ? (diffMins + " Min" + (diffMins > 1 ? "s" : "")) : "");
     }
 
@@ -255,7 +255,7 @@ Module.register("MMM-Teslamate", {
       const hrs = Math.floor(remHrs);
       const mins = Math.ceil((remHrs - hrs) * 60.0);
 
-      return (hrs > 0 ? (hrs + " Hour"+ (hrs > 1 ? "s" : "") + ", ") : "") + (mins > 0 ? (mins + " Min" + (mins > 1 ? "s" : "")) : "");
+      return (hrs > 0 ? (hrs + " Hour" + (hrs > 1 ? "s" : "") + ", ") : "") + (mins > 0 ? (mins + " Min" + (mins > 1 ? "s" : "")) : "");
     }
 
     //var title = document.createElement("h2");
@@ -281,7 +281,7 @@ Module.register("MMM-Teslamate", {
       energyAddedLi.appendChild(makeSpan("name", "Charge Added"));
       energyAddedLi.appendChild(makeSpan("value", energyAdded + " kWh"));
 
-      var timeToFullLi =  document.createElement("li");
+      var timeToFullLi = document.createElement("li");
       timeToFullLi.className = "mattribute";
       timeToFullLi.appendChild(makeSpan("icon zmdi zmdi-time zmdi-hc-fw", ""));
       timeToFullLi.appendChild(makeSpan("name", "Time to " + chargeLimitSOC + "%"));
@@ -307,7 +307,7 @@ Module.register("MMM-Teslamate", {
     wrapper.appendChild(attrList);
   },
 
-  generateGraphicDom: function(wrapper, data) {
+  generateGraphicDom: function (wrapper, data) {
     const {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
@@ -357,9 +357,9 @@ Module.register("MMM-Teslamate", {
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
 
     // calculate scales
-    var layBatScaleWidth = layBatWidth/250;  // scale factor normalized to 250
-    var layBatScaleHeight = layBatHeight/75; // scale factor normalized to 75
-    var layScaleHeight = layHeight/203; // scale factor normalized to 203
+    var layBatScaleWidth = layBatWidth / 250;  // scale factor normalized to 250
+    var layBatScaleHeight = layBatHeight / 75; // scale factor normalized to 75
+    var layScaleHeight = layHeight / 203; // scale factor normalized to 203
 
     const teslaModel = this.config.carImageOptions.model || "m3";
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
@@ -370,13 +370,13 @@ Module.register("MMM-Teslamate", {
     const imageOpacity = this.config.carImageOptions.imageOpacity || 0.4;
 
     const renderedStateIcons = stateIcons.map((icon) => `<span class="mdi mdi-${icon}"></span>`)
-    const renderedNetworkIcons = networkIcons.map((icon) => `<span class="mdi mdi-${icon}" ${icon=="alert-box"?"style='color: #f66'":""}></span>`)
+    const renderedNetworkIcons = networkIcons.map((icon) => `<span class="mdi mdi-${icon}" ${icon == "alert-box" ? "style='color: #f66'" : ""}></span>`)
 
     const batteryReserveVisible = (battery - batteryUsable) > 1; // at <= 1% reserve the app and the car don't show it, so we won't either
 
     const batteryOverlayIcon = charging ? `<span class="mdi mdi-flash bright light"></span>` :
-                               batteryReserveVisible ? `<span class="mdi mdi-snowflake bright light"></span>` :
-                               '';
+      batteryReserveVisible ? `<span class="mdi mdi-snowflake bright light"></span>` :
+        '';
 
     const batteryBigNumber = this.config.rangeDisplay === "%" ? batteryUsable : idealRange;
     const batteryUnit = this.config.rangeDisplay === "%" ? "%" : (this.config.imperial ? "mi" : "km");
@@ -393,7 +393,7 @@ Module.register("MMM-Teslamate", {
         <div style="z-index: 2; position: absolute; top: 0px; left: 0px;">
 
           <!-- Percentage/range -->
-          <div style="margin-top: ${50*layScaleHeight}px; 
+          <div style="margin-top: ${50 * layScaleHeight}px; 
                       margin-left: auto; 
                       text-align: center; 
                       width: ${layWidth}px; 
@@ -403,59 +403,59 @@ Module.register("MMM-Teslamate", {
 
           <!-- State icons -->
           <div style="float: left; 
-                      margin-top: -${65*layScaleHeight}px; 
-                      margin-left: ${((layWidth-layBatWidth)/2)-5}px; 
-                      text-align: left; ${ state == "offline" ? 'opacity: 0.3;' : '' }" 
+                      margin-top: -${65 * layScaleHeight}px; 
+                      margin-left: ${((layWidth - layBatWidth) / 2) - 5}px; 
+                      text-align: left; ${state == "offline" ? 'opacity: 0.3;' : ''}" 
                class="small">
-            ${ renderedStateIcons.join(" ") }
+            ${renderedStateIcons.join(" ")}
           </div>
 
           <!-- Online state icon -->
           <div style="float: right; 
-                      margin-top: -${65*layScaleHeight}px; 
-                      margin-right: ${((layWidth-layBatWidth)/2)-5}px; 
+                      margin-top: -${65 * layScaleHeight}px; 
+                      margin-right: ${((layWidth - layBatWidth) / 2) - 5}px; 
                       text-align: right;" 
                class="small">
-            ${ renderedNetworkIcons.join(" ") }
+            ${renderedNetworkIcons.join(" ")}
           </div>
 
           <!-- Battery graphic - outer border -->
-          <div style="margin-left: ${(layWidth-layBatWidth)/2}px;
+          <div style="margin-left: ${(layWidth - layBatWidth) / 2}px;
                       width: ${layBatWidth}px; height: ${layBatHeight}px;
                       border: 2px solid #aaa;
-                      border-radius: ${10*layBatScaleHeight}px">
+                      border-radius: ${10 * layBatScaleHeight}px">
 
             <!-- Plus pole -->
-            <div style="position: relative; top: ${(layBatHeight-layBatHeight/4)/2 -1}px; left: ${layBatWidth}px;
-                        width: ${8*layBatScaleWidth}px; height: ${layBatHeight/4}px;
+            <div style="position: relative; top: ${(layBatHeight - layBatHeight / 4) / 2 - 1}px; left: ${layBatWidth}px;
+                        width: ${8 * layBatScaleWidth}px; height: ${layBatHeight / 4}px;
                         border: 2px solid #aaa;
-                        border-top-right-radius: ${5*layBatScaleHeight}px;
-                        border-bottom-right-radius: ${5*layBatScaleHeight}px;
+                        border-top-right-radius: ${5 * layBatScaleHeight}px;
+                        border-bottom-right-radius: ${5 * layBatScaleHeight}px;
                         border-left: none;
                         background: #000">
-                <div style="width: ${8*layBatScaleWidth}px; height: ${layBatHeight/4}px;
+                <div style="width: ${8 * layBatScaleWidth}px; height: ${layBatHeight / 4}px;
                             opacity: ${imageOpacity};
                             background-image: url('${teslaImageUrl}');
-                            background-position: -351px ${imageOffset-152}px"></div>
+                            background-position: -351px ${imageOffset - 152}px"></div>
             </div>
 
             <!-- Inner border -->
             <div style="position: relative; 
-                        top: -${23*layBatScaleHeight}px; 
+                        top: -${23 * layBatScaleHeight}px; 
                         left: 0px;
 	                      margin-left: 5px;
-			                  margin-top: ${5*layBatScaleHeight}px;
-                        width: ${(layBatWidth-12)}px; height: ${layBatHeight - 8 - 2 - 2}px;
+			                  margin-top: ${5 * layBatScaleHeight}px;
+                        width: ${(layBatWidth - 12)}px; height: ${layBatHeight - 8 - 2 - 2}px;
                         border: 1px solid #aaa;
-                        border-radius: ${3*layBatScaleHeight}px">
+                        border-radius: ${3 * layBatScaleHeight}px">
 
               <!-- Green charge rectangle -->
               <div style="position: relative; top: 0px; left: 0px; z-index: 2;
                           width: ${Math.round(layBatScaleWidth * 2.38 * batteryUsable)}px;
                           height: ${layBatHeight - 8 - 2 - 2}px;
                           opacity: 0.8;
-                          border-top-left-radius: ${2.5*layBatScaleHeight}px;
-                          border-bottom-left-radius: ${2.5*layBatScaleHeight}px;
+                          border-top-left-radius: ${2.5 * layBatScaleHeight}px;
+                          border-bottom-left-radius: ${2.5 * layBatScaleHeight}px;
                           background-color: #068A00"></div>
 
               <!-- Blue reserved charge rectangle -->
@@ -472,14 +472,14 @@ Module.register("MMM-Teslamate", {
                           background-color: #366aa5"></div>
 
               <!-- Charge limit marker -->
-              <div style="position: relative; top: -${(layBatHeight - 8 - 2 - 2)*2}px; left: ${Math.round(layBatScaleWidth * 2.38 * chargeLimitSOC)-1}px;
+              <div style="position: relative; top: -${(layBatHeight - 8 - 2 - 2) * 2}px; left: ${Math.round(layBatScaleWidth * 2.38 * chargeLimitSOC) - 1}px;
                           height: ${layBatHeight - 8 - 2 - 2}px; width: 2px;
                           ${chargeLimitSOC === 0 ? "visibility: hidden" : ""}
                           border-left: 1px dashed #888"></div>
 
               <!-- Battery overlay icon (charging or snowflake) -->
               <div style="position: relative; 
-                          top: -${(layBatHeight - 8*layBatScaleHeight - 2 - 2)*2 + 56*layBatScaleHeight}px; 
+                          top: -${(layBatHeight - 8 * layBatScaleHeight - 2 - 2) * 2 + 56 * layBatScaleHeight}px; 
                           left: 0; 
                           text-align: center; 
                           z-index: 5">
