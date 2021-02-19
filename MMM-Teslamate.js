@@ -22,6 +22,7 @@ Module.register("MMM-Teslamate", {
       batWidth: 250,
       betHeight: 75,
     },
+    showTemps: "hvac_on",
   },
 
   makeServerKey: function (server) {
@@ -381,6 +382,15 @@ Module.register("MMM-Teslamate", {
     const batteryBigNumber = this.config.rangeDisplay === "%" ? batteryUsable : idealRange;
     const batteryUnit = this.config.rangeDisplay === "%" ? "%" : (this.config.imperial ? "mi" : "km");
 
+    const showTemps = ((this.config.showTemps === "always") || 
+                       (this.config.showTemps === "hvac_on" && (isClimateOn == "true" || isPreconditioning == "true"))) &&
+                      (inside_temp && outside_temp);
+    const temperatureIcons = !showTemps ? "" :
+      `<span class="mdi mdi-car normal small"></span>
+       <span class="bright light small">${inside_temp}°</span>
+       &nbsp;&nbsp;
+       <span class="mdi mdi-earth normal small"></span>
+       <span class="bright light small">${outside_temp}°</span>`;
 
     wrapper.innerHTML = `
       <div style="width: ${layWidth}px; height: ${layHeight}px;">
@@ -485,7 +495,16 @@ Module.register("MMM-Teslamate", {
                           z-index: 5">
                 ${batteryOverlayIcon}
               </div>
+
             </div>
+          </div>
+
+          <!-- Optional graphic mode icons below the car -->
+          <div style="text-align: center; 
+                      margin-top: -10px; 
+                      ${temperatureIcons == "" ? 'display: none;' : ''}
+                      ${state == "offline" || state == "asleep" || state == "suspended" ? 'opacity: 0.3;' : ''}">
+            ${temperatureIcons}
           </div>
         </div>
       </div>
