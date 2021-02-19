@@ -75,7 +75,10 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
             verticalOffset: 0,
 
             opacity: 0.5
-        }
+        },
+
+        // show inside and outside temperatures below the car image: when AC or preconditioning is running (default), always, or never
+        showTemps: "hvac_on", // "always", "never"
     }
 },
 ```
