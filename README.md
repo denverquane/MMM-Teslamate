@@ -37,7 +37,7 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
     config: {
         mqttServer: {
             address: '192.168.1.8',  // Server address or IP address of the MQTT broker
-            port: '1883'          // Port number if other than default (1883)
+            port: 1883,              // Port number if other than default (1883)
             //user: 'user',          // Leave out for no user
             //password: 'password',  // Leave out for no password
         },
