@@ -59,6 +59,8 @@ Then run `npm install` inside the new cloned folder, and make sure to add the mo
             // the battery images itself
             batWitdh: 250, // px, default: 250
             batHeight: 75, // px, default: 75
+            // visual distance reduction to the module above
+            topOffset: -40, // px, default: -40
         },
         carImageOptions: {
             model: "m3", // mx, ms (S pre-refresh), ? (S post-refresh)

@@ -20,7 +20,8 @@ Module.register("MMM-Teslamate", {
       width: 450,
       height: 203,
       batWidth: 250,
-      betHeight: 75,
+      batHeight: 75,
+      topOffset: -40,
     },
     showTemps: "hvac_on",
   },
@@ -356,6 +357,8 @@ Module.register("MMM-Teslamate", {
     // the battery images itself
     const layBatWidth = this.config.sizeOptions.batWidth || 250; // px, default: 250
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
+    // top offset - to reduce visual distance to the module above
+    const topOffset = this.config.sizeOptions.topOffset || -40; // px, default: -40
 
     // calculate scales
     var layBatScaleWidth = layBatWidth / 250;  // scale factor normalized to 250
@@ -395,12 +398,15 @@ Module.register("MMM-Teslamate", {
     wrapper.innerHTML = `
       <div style="width: ${layWidth}px; height: ${layHeight}px;">
         <link href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"> 
-        <div style="z-index: 1; position: absolute; top: 0px; left: 0px; 
+        <div style="z-index: 1; 
+                    position: relative; top: 0px; left: 0px; 
+                    margin-top: ${topOffset}px;
+                    margin-bottom: -${layHeight}px;
                     width: ${layWidth}px; height: ${layHeight}px; 
                     opacity: ${imageOpacity}; 
                     background-image: url('${teslaImageUrl}'); 
                     background-position: 0px ${imageOffset}px;"></div>
-        <div style="z-index: 2; position: absolute; top: 0px; left: 0px;">
+        <div style="z-index: 2; position: relative; top: 0px; left: 0px; margin-top: ${topOffset}px;">
 
           <!-- Percentage/range -->
           <div style="margin-top: ${50 * layScaleHeight}px; 
