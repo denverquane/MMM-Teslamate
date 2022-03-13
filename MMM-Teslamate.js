@@ -488,13 +488,16 @@ Module.register("MMM-Teslamate", {
                           background-color: #366aa5"></div>
 
               <!-- Charge limit marker -->
-              <div style="position: relative; top: -${(layBatHeight - 8 - 2 - 2) * 2}px; left: ${Math.round(layBatScaleWidth * 2.38 * chargeLimitSOC) - 1}px;
+              <div style="position: relative; 
+                          top: -${(layBatHeight - 8 - 2 - 2) * 2}px; 
+                          left: ${Math.round(layBatScaleWidth * 2.38 * chargeLimitSOC) - 1}px;
                           height: ${layBatHeight - 8 - 2 - 2}px; width: 2px;
                           ${chargeLimitSOC === 0 ? "visibility: hidden" : ""}
                           border-left: 1px dashed #888"></div>
 
               <!-- Battery overlay icon (charging or snowflake) -->
-              <div style="position: relative; 
+              <div class="medium"
+                   style="position: relative; 
                           top: -${(layBatHeight - 8 * layBatScaleHeight - 2 - 2) * 2 + 56 * layBatScaleHeight}px; 
                           left: 0; 
                           text-align: center; 
@@ -507,7 +510,6 @@ Module.register("MMM-Teslamate", {
 
           <!-- Optional graphic mode icons below the car -->
           <div style="text-align: center; 
-                      margin-top: -10px; 
                       ${temperatureIcons == "" ? 'display: none;' : ''}
                       ${state == "offline" || state == "asleep" || state == "suspended" ? 'opacity: 0.3;' : ''}">
             ${temperatureIcons}
