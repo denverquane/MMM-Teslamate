@@ -4,6 +4,6 @@
   "description": "Display Tesla information, hooking into the Teslamate utility",
   "author": "Denver Quane",
   "dependencies": {
-    "mqtt": "^4.2.6"
+    "mqtt": "^4.3.6"
   }
 }
