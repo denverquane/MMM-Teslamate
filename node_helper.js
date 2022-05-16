@@ -53,7 +53,7 @@ module.exports = NodeHelper.create({
     },
 
     makeServerKey: function (server) {
-        return '' + server.address + ':' + (server.port | '1883' + server.user);
+        return '' + server.address + ':' + (server.port ?? '1883');
     },
 
     addServer: function (server, carID) {
