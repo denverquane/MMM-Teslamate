@@ -26,7 +26,7 @@ Clone this repo into your MagicMirror modules directory using:
 
 ```git clone https://github.com/denverquane/MMM-Teslamate.git```
 
-Then run `npm install` inside the new cloned folder, and make sure to add the module to your MagicMirror config (config/config.js), using configuration similar to that in the Configuration section below.
+Then run `npm ci` inside the new cloned folder, and make sure to add the module to your MagicMirror config (config/config.js), using configuration similar to that in the Configuration section below.
 
 ## Sample Configuration
 
