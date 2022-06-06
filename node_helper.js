@@ -102,12 +102,12 @@ module.exports = NodeHelper.create({
         server.client = mqtt.connect(mqttServer, server.options);
 
         server.client.on('error', function (err) {
-            console.log(self.name + ' ' + server.serverKey + ': Error: ' + err);
+            console.log(self.name + ' ' + server.serverKey + ': Error: ', err);
         });
 
         server.client.on('reconnect', function (err) {
             server.value = 'reconnecting'; // Hmmm...
-            console.log(self.name + ': ' + server.serverKey + ' reconnecting');
+            console.log(self.name + ': ' + server.serverKey + ' reconnecting, error was: ', err);
         });
 
         server.client.on('connect', function (connack) {
