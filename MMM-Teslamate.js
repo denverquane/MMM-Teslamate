@@ -24,6 +24,7 @@ Module.register("MMM-Teslamate", {
       topOffset: -40,
     },
     showTemps: "hvac_on",
+    updatePeriod: 5,
   },
 
   makeServerKey: function (server) {
@@ -123,10 +124,25 @@ Module.register("MMM-Teslamate", {
             this.subscriptions[key] = sub;
           }
         }
-        this.updateDom();
+        this.triggerDomUpdate();
       } else {
         console.log(this.name + ': MQTT_PAYLOAD - No payload');
       }
+    }
+  },
+
+  triggerDomUpdate: function () {
+    // Render immediately if we never rendered before or if it's more than 5s ago (configurable)
+    if (!this.lastRenderTimestamp || this.lastRenderTimestamp <= (Date.now() - this.config.updatePeriod * 1000)) {
+      this.updateDom();
+      this.lastRenderTimestamp = Date.now();
+    // Schedule a render in 5s if one isn't scheduled already
+    } else if (!this.nextRenderTimer) {
+      this.nextRenderTimer = setTimeout(() => {
+        this.updateDom();
+        this.lastRenderTimestamp = Date.now();
+        this.nextRenderTimer = null;
+      }, this.config.updatePeriod * 1000);
     }
   },
 

@@ -81,6 +81,9 @@ Then run `npm ci` inside the new cloned folder, and make sure to add the module 
 
         // show inside and outside temperatures below the car image: when AC or preconditioning is running (default), always, or never
         showTemps: "hvac_on", // "always", "never"
+
+        // time in seconds to wait before re-rendering the module on incoming data. prevents high CPU load due to re-rendering on every new data point during driving
+        updatePeriod: 5,
     }
 },
 ```
