@@ -62,6 +62,19 @@ Then run `npm ci` inside the new cloned folder, and make sure to add the module 
             // visual distance reduction to the module above
             topOffset: -40, // px, default: -40
         },
+        displayOptions: {
+            odometer: {
+                visible: true, // bool, default: true (option to hide the odometer)
+                fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
+            },
+            batteryBar: {
+                visible: true, // bool, default: true (option to hide the battery-bar)
+                topMargin: 0, // px, default: 0 (px-value to add space between the battery-bar and the informations above)
+            },
+            temperatureIcons: {
+                topMargin: 0, // px, default: 0 (px-value to add space between the temperature-icons and the informations above)
+            }
+        },
         carImageOptions: {
             model: "m3", // mx, ms (S pre-refresh), ? (S post-refresh)
 
