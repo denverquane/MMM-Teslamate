@@ -422,7 +422,7 @@ Module.register("MMM-Teslamate", {
     const batteryBigNumber = this.config.rangeDisplay === "%" ? batteryUsable : idealRange;
     const batteryUnit = this.config.rangeDisplay === "%" ? "%" : (this.config.imperial ? "mi" : "km");
 
-    const showTemps = ((this.config.showTemps === "always") || 
+    const showTemps = ((this.config.showTemps === "always") ||
                        (this.config.showTemps === "hvac_on" && (isClimateOn == "true" || isPreconditioning == "true"))) &&
                       (inside_temp && outside_temp);
     const temperatureIcons = !showTemps ? "" :
