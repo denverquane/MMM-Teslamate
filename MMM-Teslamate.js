@@ -21,7 +21,6 @@ Module.register("MMM-Teslamate", {
       height: 203,
       batWidth: 250,
       batHeight: 75,
-      batTopMargin: 0,
       topOffset: -40,
     },
     displayOptions: {
@@ -30,6 +29,7 @@ Module.register("MMM-Teslamate", {
       },
       batteryBar: {
         visible: true,
+        topMargin: 0,
       },
     },
     showTemps: "hvac_on",
@@ -384,7 +384,7 @@ Module.register("MMM-Teslamate", {
     // the battery images itself
     const layBatWidth = this.config.sizeOptions.batWidth || 250; // px, default: 250
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
-    const layBatTopMargin = this.config.sizeOptions.batTopMargin || 0; // px, default: 0
+    const layBatTopMargin = this.config.displayOptions.batteryBar.topMargin || 0; // px, default: 0
     // top offset - to reduce visual distance to the module above
     const topOffset = this.config.sizeOptions.topOffset || -40; // px, default: -40
 
