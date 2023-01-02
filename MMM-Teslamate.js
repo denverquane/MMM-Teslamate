@@ -21,6 +21,7 @@ Module.register("MMM-Teslamate", {
       height: 203,
       batWidth: 250,
       batHeight: 75,
+      batTopMargin: 0,
       topOffset: -40,
     },
     displayOptions: {
@@ -379,6 +380,7 @@ Module.register("MMM-Teslamate", {
     // the battery images itself
     const layBatWidth = this.config.sizeOptions.batWidth || 250; // px, default: 250
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
+    const layBatTopMargin = this.config.sizeOptions.batTopMargin || 0; // px, default: 0
     // top offset - to reduce visual distance to the module above
     const topOffset = this.config.sizeOptions.topOffset || -40; // px, default: -40
 
@@ -424,6 +426,7 @@ Module.register("MMM-Teslamate", {
         <!-- Battery graphic - outer border -->
         <div style="margin-left: ${(layWidth - layBatWidth) / 2}px;
                     width: ${layBatWidth}px; height: ${layBatHeight}px;
+                    margin-top: ${layBatTopMargin}px;
                     border: 2px solid #aaa;
                     border-radius: ${10 * layBatScaleHeight}px">
 
