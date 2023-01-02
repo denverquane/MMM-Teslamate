@@ -31,6 +31,9 @@ Module.register("MMM-Teslamate", {
         visible: true,
         topMargin: 0,
       },
+      temperatureIcons: {
+        topMargin: 0,
+      }
     },
     showTemps: "hvac_on",
     updatePeriod: 5,
@@ -549,6 +552,7 @@ Module.register("MMM-Teslamate", {
 
           <!-- Optional graphic mode icons below the car -->
           <div style="text-align: center; 
+                      margin-top: ${this.config.displayOptions.temperatureIcons.topMargin || 0}px;
                       ${temperatureIcons == "" ? 'display: none;' : ''}
                       ${state == "offline" || state == "asleep" || state == "suspended" ? 'opacity: 0.3;' : ''}">
             ${temperatureIcons}
