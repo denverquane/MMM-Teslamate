@@ -25,8 +25,12 @@ Module.register("MMM-Teslamate", {
       topOffset: -40,
     },
     displayOptions: {
-      odometer: true,
-      batteryBar: true,
+      odometer: {
+        visible: true,
+      },
+      batteryBar: {
+        visible: true,
+      },
     },
     showTemps: "hvac_on",
     updatePeriod: 5,
@@ -320,7 +324,7 @@ Module.register("MMM-Teslamate", {
       attrList.appendChild(chargeStartLi);
     }
 
-    if (this.config.displayOptions.odometer) {
+    if (this.config.displayOptions.odometer.visible) {
       var odometerLi = document.createElement("li");
       odometerLi.className = "mattribute";
       odometerLi.appendChild(makeSpan("icon zmdi zmdi-dot-circle-alt zmdi-hc-fw", ""));
@@ -421,7 +425,7 @@ Module.register("MMM-Teslamate", {
        <span class="bright light small">${outside_temp}°</span>`;
 
     let batteryBarHtml = '';
-    if (this.config.displayOptions.batteryBar) {
+    if (this.config.displayOptions.batteryBar.visible) {
       batteryBarHtml = `
         <!-- Battery graphic - outer border -->
         <div style="margin-left: ${(layWidth - layBatWidth) / 2}px;
