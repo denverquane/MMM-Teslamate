@@ -26,6 +26,7 @@ Module.register("MMM-Teslamate", {
     displayOptions: {
       odometer: {
         visible: true,
+        fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
       },
       batteryBar: {
         visible: true,
@@ -330,6 +331,10 @@ Module.register("MMM-Teslamate", {
     if (this.config.displayOptions.odometer.visible) {
       var odometerLi = document.createElement("li");
       odometerLi.className = "mattribute";
+      if (this.config.displayOptions.odometer.fontSize !== null) {
+        odometerLi.style = 'font-size: ' + parseFloat(this.config.displayOptions.odometer.fontSize) + 'rem';
+      }
+
       odometerLi.appendChild(makeSpan("icon zmdi zmdi-dot-circle-alt zmdi-hc-fw", ""));
       odometerLi.appendChild(makeSpan("name", "Odometer"));
       odometerLi.appendChild(makeSpan("value", odometer + (!this.config.imperial ? " Km" : " Mi")));
