@@ -45,6 +45,10 @@ Module.register("MMM-Teslamate", {
         visible: true,
         fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
       },
+      geofence: {
+        visible: true,
+        fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
+      },
     },
     showTemps: "hvac_on",
     updatePeriod: 5,
@@ -365,6 +369,20 @@ Module.register("MMM-Teslamate", {
       tpmsLi.appendChild(makeSpan("value", tpms_fl + ", " + tpms_fr + ", " + tpms_rl + ", " + tpms_rr + (!this.config.imperial ? " (bar)" : " (psi)")));
 
       attrList.appendChild(tpmsLi);
+    }
+
+    if (this.config.displayOptions.geofence.visible && geofence != null) {
+      var geofenceLi = document.createElement("li");
+      geofenceLi.className = "mattribute";
+      if (this.config.displayOptions.geofence.fontSize !== null) {
+        geofenceLi.style = 'font-size: ' + parseFloat(this.config.displayOptions.geofence.fontSize) + 'rem';
+      }
+
+      geofenceLi.appendChild(makeSpan("icon zmdi zmdi-my-location zmdi-hc-fw", ""));
+      geofenceLi.appendChild(makeSpan("name", "Location"));
+      geofenceLi.appendChild(makeSpan("value", geofence));
+
+      attrList.appendChild(geofenceLi);
     }
 
     if (this.config.displayOptions.speed.visible && state == "driving") {

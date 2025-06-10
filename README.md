@@ -82,6 +82,10 @@ Then run `npm ci` inside the new cloned folder, and make sure to add the module 
                 visible: true, // bool, default: true (option to hide the speed)
                 fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
             },
+            geofence: {
+                visible: true, // bool, default: true (option to hide the speed)
+                fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
+            }
         },
         carImageOptions: {
             model: "m3", // mx, ms (S pre-refresh), ? (S post-refresh)
