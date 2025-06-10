@@ -1,9 +1,11 @@
 Module.register("MMM-Teslamate", {
 
   getScripts: function () {
+    console.log(this.name + ": getScripts called");
     return [];
   },
   getStyles: function () {
+    console.log(this.name + ": getStyles called");
     return [
       'https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css',
       'Teslamate.css',
@@ -34,17 +36,27 @@ Module.register("MMM-Teslamate", {
       },
       temperatureIcons: {
         topMargin: 0,
-      }
+      },
+      tpms: {
+        visible: true,
+        fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
+      },
+      speed: {
+        visible: true,
+        fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
+      },
     },
     showTemps: "hvac_on",
     updatePeriod: 5,
   },
 
   makeServerKey: function (server) {
+    console.log(this.name + ": makeServerKey called with server: ", server);
     return '' + server.address + ':' + (server.port ?? '1883');
   },
 
   start: function () {
+    console.log(this.name + ": start called");
     const topicPrefix = 'teslamate/cars/' + this.config.carID;
 
     const Topics = {
@@ -80,18 +92,18 @@ Module.register("MMM-Teslamate", {
       plugged_in: topicPrefix + '/plugged_in',
       charge_added: topicPrefix + '/charge_energy_added',
       charge_limit: topicPrefix + '/charge_limit_soc',
-      // charge_port: 'teslamate/cars/1/charge_port_door_open',
-      // charge_current: 'teslamate/cars/1/charger_actual_current',
-      // charge_phases: 'teslamate/cars/1/charger_phases',
-      // charge_power: 'teslamate/cars/1/charger_power',
-      // charge_voltage: 'teslamate/cars/1/charger_voltage',
       charge_start: topicPrefix + '/scheduled_charging_start_time',
       charge_time: topicPrefix + '/time_to_full_charge',
 
       update_available: topicPrefix + '/update_available',
+      geofence: topicPrefix + '/geofence',
+      tpms_fl: topicPrefix + '/tpms_pressure_fl',
+      tpms_fr: topicPrefix + '/tpms_pressure_fr',
+      tpms_rl: topicPrefix + '/tpms_pressure_rl',
+      tpms_rr: topicPrefix + '/tpms_pressure_rr',
     };
 
-    console.log(this.name + ' started.');
+    console.log(this.name + ": Topics initialized");
     this.subscriptions = {
       lat: {},
       lon: {},
@@ -99,13 +111,13 @@ Module.register("MMM-Teslamate", {
 
     console.log(this.name + ': Setting up connection to server');
 
-    var s = this.config.mqttServer
+    var s = this.config.mqttServer;
     var serverKey = this.makeServerKey(s);
     console.log(this.name + ': Adding config for ' + s.address + ' port ' + s.port + ' user ' + s.user);
 
     for (let key in Topics) {
       var topic = Topics[key];
-      console.log(topic);
+      console.log(this.name + ': Subscribing to topic: ' + topic);
       this.subscriptions[key] = {
         topic: topic,
         serverKey: serverKey,
@@ -114,25 +126,28 @@ Module.register("MMM-Teslamate", {
       };
     }
 
+    console.log(this.name + ": Subscriptions initialized");
     this.openMqttConnection();
-    var self = this;
-
   },
 
   openMqttConnection: function () {
+    console.log(this.name + ": openMqttConnection called");
     this.sendSocketNotification('MQTT_CONFIG', this.config);
   },
 
   socketNotificationReceived: function (notification, payload) {
+    console.log(this.name + ": socketNotificationReceived - Notification: " + notification);
     if (notification === 'MQTT_PAYLOAD') {
       if (payload != null) {
+        console.log(this.name + ": MQTT_PAYLOAD received for serverKey: " + payload.serverKey + " and topic: " + payload.topic);
         for (let key in this.subscriptions) {
-          sub = this.subscriptions[key];
-          //console.log(sub);
+          let sub = this.subscriptions[key];
           if (sub.serverKey == payload.serverKey && sub.topic == payload.topic) {
             var value = payload.value;
             sub.value = value;
             sub.time = payload.time;
+
+            console.log(this.name + ": Updated subscription for key: " + key + " with value: " + value);
 
             this.subscriptions[key] = sub;
           }
@@ -145,12 +160,15 @@ Module.register("MMM-Teslamate", {
   },
 
   triggerDomUpdate: function () {
+    console.log(this.name + ": triggerDomUpdate called");
     // Render immediately if we never rendered before or if it's more than 5s ago (configurable)
     if (!this.lastRenderTimestamp || this.lastRenderTimestamp <= (Date.now() - this.config.updatePeriod * 1000)) {
+      console.log(this.name + ": Immediate DOM update");
       this.updateDom();
       this.lastRenderTimestamp = Date.now();
     // Schedule a render in 5s if one isn't scheduled already
     } else if (!this.nextRenderTimer) {
+      console.log(this.name + ": Scheduling DOM update");
       this.nextRenderTimer = setTimeout(() => {
         this.updateDom();
         this.lastRenderTimestamp = Date.now();
@@ -160,6 +178,7 @@ Module.register("MMM-Teslamate", {
   },
 
   getDom: function () {
+    console.log(this.name + ": getDom called");
     const kmToMiFixed = function (miles, fixed) {
       return (miles / 1.609344).toFixed(fixed);
     };
@@ -167,10 +186,14 @@ Module.register("MMM-Teslamate", {
     const cToFFixed = function (celcius, fixed) {
       return ((celcius * 9 / 5) + 32).toFixed(fixed);
     };
+
+    const barToPSI = function (bar, fixed) {
+      return (bar * 14.503773773).toFixed(fixed);
+    };
+
     const wrapper = document.createElement('div');
 
     const carName = this.subscriptions["name"].value;
-    //TODO is this interesting to see displayed?
     const state = this.subscriptions["state"].value;
     const latitude = this.subscriptions["lat"].value;
     const longitude = this.subscriptions["lon"].value;
@@ -194,8 +217,7 @@ Module.register("MMM-Teslamate", {
     const isPreconditioning = this.subscriptions["preconditioning"].value;
     const isHealthy = this.subscriptions["health"].value;
     const isUpdateAvailable = this.subscriptions["update_available"].value;
-
-    //const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
+    const geofence = this.subscriptions["geofence"].value;
 
     var idealRange = this.subscriptions["ideal_range"].value ? this.subscriptions["ideal_range"].value : 0;
     var estRange = this.subscriptions["est_range"].value ? this.subscriptions["est_range"].value : 0;
@@ -203,6 +225,11 @@ Module.register("MMM-Teslamate", {
     var outside_temp = this.subscriptions["outside_temp"].value ? this.subscriptions["outside_temp"].value : 0;
     var inside_temp = this.subscriptions["inside_temp"].value ? this.subscriptions["inside_temp"].value : 0;
     var odometer = this.subscriptions["odometer"].value ? this.subscriptions["odometer"].value : 0;
+
+    var tpms_fl = this.subscriptions["tpms_fl"].value ? this.subscriptions["tpms_fl"].value : 0;
+    var tpms_fr = this.subscriptions["tpms_fr"].value ? this.subscriptions["tpms_fr"].value : 0;
+    var tpms_rl = this.subscriptions["tpms_rl"].value ? this.subscriptions["tpms_rl"].value : 0;
+    var tpms_rr = this.subscriptions["tpms_rr"].value ? this.subscriptions["tpms_rr"].value : 0;
 
     if (!this.config.imperial) {
       idealRange = (idealRange * 1.0).toFixed(0);
@@ -212,6 +239,11 @@ Module.register("MMM-Teslamate", {
 
       outside_temp = (outside_temp * 1.0).toFixed(1);
       inside_temp = (inside_temp * 1.0).toFixed(1);
+
+      tpms_fl = (tpms_fl * 1.0).toFixed(1);
+      tpms_fr = (tpms_fr * 1.0).toFixed(1);
+      tpms_rl = (tpms_rl * 1.0).toFixed(1);
+      tpms_rr = (tpms_rr * 1.0).toFixed(1);
     } else {
       idealRange = kmToMiFixed(idealRange, 0);
       estRange = kmToMiFixed(estRange, 0);
@@ -220,6 +252,11 @@ Module.register("MMM-Teslamate", {
 
       outside_temp = cToFFixed(outside_temp, 1);
       inside_temp = cToFFixed(inside_temp, 1);
+
+      tpms_fl = barToPSI(tpms_fl,1);
+      tpms_fr = barToPSI(tpms_fr,1);
+      tpms_rl = barToPSI(tpms_rl,1);
+      tpms_rr = barToPSI(tpms_rr,1);
     }
 
     const data = {
@@ -228,13 +265,12 @@ Module.register("MMM-Teslamate", {
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
       doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
-      isPreconditioning
+      isPreconditioning, geofence, tpms_fl, tpms_fr, tpms_rl, tpms_rr
     }
 
-    //always graphic mode
+    console.log(this.name + ": Generating DOM with data: ", data);
     this.generateGraphicDom(wrapper, data);
 
-    //optionally append the table
     if (this.config.hybridView)
       this.generateTableDom(wrapper, data);
 
@@ -242,27 +278,16 @@ Module.register("MMM-Teslamate", {
   },
 
   generateTableDom: function (wrapper, data) {
+    console.log(this.name + ": generateTableDom called with data: ", data);
+
     const {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
       doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
-      isPreconditioning
+      isPreconditioning, geofence, tpms_fl, tpms_fr, tpms_rl, tpms_rr
     } = data;
-
-    //const getBatteryLevelClass = function (bl, warn, danger) {
-    //  if (bl < danger) {
-    //    return 'danger';
-    //  }
-    //  if (bl < warn) {
-    //    return 'warning';
-    //  }
-    //  if (bl >= warn) {
-    //    return 'ok';
-    //  }
-    //  return '';
-    //};
 
     const makeSpan = function (className, content) {
       var span = document.createElement("span");
@@ -281,7 +306,6 @@ Module.register("MMM-Teslamate", {
       return returnStr + (diffMins > 0 ? (diffMins + " Min" + (diffMins > 1 ? "s" : "")) : "");
     }
 
-    //TODO bother formatting days? Poor trickle chargers...
     const makeChargeRemString = function (remHrs) {
       const hrs = Math.floor(remHrs);
       const mins = Math.ceil((remHrs - hrs) * 60.0);
@@ -289,21 +313,8 @@ Module.register("MMM-Teslamate", {
       return (hrs > 0 ? (hrs + " Hour" + (hrs > 1 ? "s" : "") + ", ") : "") + (mins > 0 ? (mins + " Min" + (mins > 1 ? "s" : "")) : "");
     }
 
-    //var title = document.createElement("h2");
-    //title.className = "mqtt-title";
-    //var iconSpan = document.createElement("span");
-
-    //TODO does this need to be "classlist"?
-    //iconSpan.className = "zmdi zmdi-car zmdi-hc-2x icon"
-    //title.innerHTML = carName;
-    //title.prepend(iconSpan);
-
-    //wrapper.appendChild(title);
-
     var attrList = document.createElement("ul");
     attrList.className = "mattributes";
-
-    //attrList.appendChild(rangeCompare);
 
     if (charging) {
       var energyAddedLi = document.createElement("li");
@@ -341,17 +352,48 @@ Module.register("MMM-Teslamate", {
 
       attrList.appendChild(odometerLi);
     }
+
+    if (this.config.displayOptions.tpms.visible) {
+      var tpmsLi = document.createElement("li");
+      tpmsLi.className = "mattribute";
+      if (this.config.displayOptions.tpms.fontSize !== null) {
+        tpmsLi.style = 'font-size: ' + parseFloat(this.config.displayOptions.tpms.fontSize) + 'rem';
+      }
+
+      tpmsLi.appendChild(makeSpan("icon zmdi zmdi-star-cirle zmdi-hc-fw", ""));
+      tpmsLi.appendChild(makeSpan("name", "TPMS"));
+      tpmsLi.appendChild(makeSpan("value", tpms_fl + ", " + tpms_fr + ", " + tpms_rl + ", " + tpms_rr + (!this.config.imperial ? " (bar)" : " (psi)")));
+
+      attrList.appendChild(tpmsLi);
+    }
+
+    if (this.config.displayOptions.speed.visible && state == "driving") {
+      var speedLi = document.createElement("li");
+      speedLi.className = "mattribute";
+      if (this.config.displayOptions.speed.fontSize !== null) {
+        speedLi.style = 'font-size: ' + parseFloat(this.config.displayOptions.speed.fontSize) + 'rem';
+      }
+
+      speedLi.appendChild(makeSpan("icon zmdi zmdi-run zmdi-hc-fw", ""));
+      speedLi.appendChild(makeSpan("name", "Speed"));
+      speedLi.appendChild(makeSpan("value", speed + (!this.config.imperial ? " km/h" : " mph")));
+
+      attrList.appendChild(speedLi);
+    }
+
     wrapper.appendChild(attrList);
   },
 
   generateGraphicDom: function (wrapper, data) {
+    console.log(this.name + ": generateGraphicDom called with data: ", data);
+
     const {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
-      chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
+      chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
       doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
-      isPreconditioning
+      isPreconditioning, geofence, tpms_fl, tpms_fr, tpms_rl, tpms_rr
     } = data;
 
     const stateIcons = [];
@@ -386,26 +428,18 @@ Module.register("MMM-Teslamate", {
     networkIcons.push((state == "offline") ? "signal-off" : "signal");
 
     // size options
-    // size of the icons + battery (above text)
     const layWidth = this.config.sizeOptions.width || 450; // px, default: 450
     const layHeight = this.config.sizeOptions.height || 203; // px, default: 203
-    // the battery images itself
     const layBatWidth = this.config.sizeOptions.batWidth || 250; // px, default: 250
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
     const layBatTopMargin = this.config.displayOptions.batteryBar.topMargin || 0; // px, default: 0
-    // top offset - to reduce visual distance to the module above
     const topOffset = this.config.sizeOptions.topOffset || -40; // px, default: -40
-
-    // calculate scales
-    var layBatScaleWidth = layBatWidth / 250;  // scale factor normalized to 250
-    var layBatScaleHeight = layBatHeight / 75; // scale factor normalized to 75
-    var layScaleHeight = layHeight / 203; // scale factor normalized to 203
 
     const teslaModel = this.config.carImageOptions.model || "m3";
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
     const teslaOptions = this.config.carImageOptions.options || "PPSW,W32B,SLR1";
 
-    const teslaImageWidth = 720; // Tesla compositor stopped returning arbitrary-sized images, only steps of 250, 400, 720 etc work now. We use CSS to scale the image to the correct layout width
+    const teslaImageWidth = 720;
     const teslaImageUrl = `https://static-assets.tesla.com/v1/compositor/?model=${teslaModel}&view=${teslaView}&size=${teslaImageWidth}&options=${teslaOptions}&bkba_opt=1`;
     const imageOffset = this.config.carImageOptions.verticalOffset || 0;
     const imageOpacity = this.config.carImageOptions.imageOpacity || 0.4;
@@ -413,11 +447,10 @@ Module.register("MMM-Teslamate", {
     const renderedStateIcons = stateIcons.map((icon) => `<span class="mdi mdi-${icon}"></span>`)
     const renderedNetworkIcons = networkIcons.map((icon) => `<span class="mdi mdi-${icon}" ${icon == "alert-box" ? "style='color: #f66'" : ""}></span>`)
 
-    const batteryReserveVisible = (battery - batteryUsable) > 1; // at <= 1% reserve the app and the car don't show it, so we won't either
+    const batteryReserveVisible = (battery - batteryUsable) > 1;
 
     const batteryOverlayIcon = charging ? `<span class="mdi mdi-flash bright light"></span>` :
-      batteryReserveVisible ? `<span class="mdi mdi-snowflake bright light"></span>` :
-        '';
+      batteryReserveVisible ? `<span class="mdi mdi-snowflake bright light"></span>` : '';
 
     const batteryBigNumber = this.config.rangeDisplay === "%" ? batteryUsable : idealRange;
     const batteryUnit = this.config.rangeDisplay === "%" ? "%" : (this.config.imperial ? "mi" : "km");
@@ -435,29 +468,20 @@ Module.register("MMM-Teslamate", {
     let batteryBarHtml = '';
     if (this.config.displayOptions.batteryBar.visible) {
       batteryBarHtml = `
-        <!-- Battery graphic - outer border -->
         <div style="margin-left: ${(layWidth - layBatWidth) / 2}px;
                     width: ${layBatWidth}px; height: ${layBatHeight}px;
                     margin-top: ${layBatTopMargin}px;
                     border: 2px solid #aaa;
                     border-radius: ${10 * layBatScaleHeight}px">
 
-          <!-- Plus pole -->
           <div style="position: relative; top: ${(layBatHeight - layBatHeight / 4) / 2 - 1}px; left: ${layBatWidth}px;
                       width: ${8 * layBatScaleWidth}px; height: ${layBatHeight / 4}px;
                       border: 2px solid #aaa;
                       border-top-right-radius: ${5 * layBatScaleHeight}px;
                       border-bottom-right-radius: ${5 * layBatScaleHeight}px;
                       border-left: none;
-                      background: #000">
-              <div style="width: ${8 * layBatScaleWidth}px; height: ${layBatHeight / 4}px;
-                          opacity: ${imageOpacity};
-                          background-image: url('${teslaImageUrl}');
-                          background-size: ${layWidth}px;
-                          background-position: -351px ${imageOffset - 152}px"></div>
-          </div>
+                      background: #000"></div>
 
-          <!-- Inner border -->
           <div style="position: relative; 
                       top: -${23 * layBatScaleHeight}px; 
                       left: 0px;
@@ -467,7 +491,6 @@ Module.register("MMM-Teslamate", {
                       border: 1px solid #aaa;
                       border-radius: ${3 * layBatScaleHeight}px">
 
-            <!-- Green charge rectangle -->
             <div style="position: relative; top: 0px; left: 0px; z-index: 2;
                         width: ${Math.round(layBatScaleWidth * 2.38 * batteryUsable)}px;
                         height: ${layBatHeight - 8 - 2 - 2}px;
@@ -476,7 +499,6 @@ Module.register("MMM-Teslamate", {
                         border-bottom-left-radius: ${2.5 * layBatScaleHeight}px;
                         background-color: #068A00"></div>
 
-            <!-- Blue reserved charge rectangle -->
             <div style="position: relative; 
                         top: -${layBatHeight - 8 - 2 - 2}px; 
                         left: ${Math.round(layBatScaleWidth * 2.38 * batteryUsable)}px; 
@@ -489,7 +511,6 @@ Module.register("MMM-Teslamate", {
                         border-bottom-left-radius: 2.5px;
                         background-color: #366aa5"></div>
 
-            <!-- Charge limit marker -->
             <div style="position: relative; 
                         top: -${(layBatHeight - 8 - 2 - 2) * 2}px; 
                         left: ${Math.round(layBatScaleWidth * 2.38 * chargeLimitSOC) - 1}px;
@@ -497,7 +518,6 @@ Module.register("MMM-Teslamate", {
                         ${chargeLimitSOC === 0 ? "visibility: hidden" : ""}
                         border-left: 1px dashed #888"></div>
 
-            <!-- Battery overlay icon (charging or snowflake) -->
             <div class="medium"
                  style="position: relative; 
                         top: -${(layBatHeight - 8 * layBatScaleHeight - 2 - 2) * 2 + 56 * layBatScaleHeight}px; 
@@ -526,7 +546,6 @@ Module.register("MMM-Teslamate", {
                     background-position: 0px ${imageOffset}px;"></div>
         <div style="z-index: 2; position: relative; top: 0px; left: 0px; margin-top: ${topOffset}px;">
 
-          <!-- Percentage/range -->
           <div style="margin-top: ${50 * layScaleHeight}px; 
                       margin-left: auto; 
                       text-align: center; 
@@ -535,7 +554,6 @@ Module.register("MMM-Teslamate", {
             <span class="bright large light">${batteryBigNumber}</span><span class="normal medium">${batteryUnit}</span>
           </div>
 
-          <!-- State icons -->
           <div style="float: left; 
                       margin-top: -${65 * layScaleHeight}px; 
                       margin-left: ${((layWidth - layBatWidth) / 2) - 5}px; 
@@ -544,7 +562,6 @@ Module.register("MMM-Teslamate", {
             ${renderedStateIcons.join(" ")}
           </div>
 
-          <!-- Online state icon -->
           <div style="float: right; 
                       margin-top: -${65 * layScaleHeight}px; 
                       margin-right: ${((layWidth - layBatWidth) / 2) - 5}px; 
@@ -555,7 +572,6 @@ Module.register("MMM-Teslamate", {
 
           ${batteryBarHtml}
 
-          <!-- Optional graphic mode icons below the car -->
           <div style="text-align: center; 
                       margin-top: ${this.config.displayOptions.temperatureIcons.topMargin || 0}px;
                       ${temperatureIcons == "" ? 'display: none;' : ''}
@@ -564,6 +580,6 @@ Module.register("MMM-Teslamate", {
           </div>
         </div>
       </div>
-		`;
+    `;
   }
 });

@@ -73,7 +73,15 @@ Then run `npm ci` inside the new cloned folder, and make sure to add the module 
             },
             temperatureIcons: {
                 topMargin: 0, // px, default: 0 (px-value to add space between the temperature-icons and the informations above)
-            }
+            },
+            tpms: {
+                visible: true, // bool, default: true (option to hide the tpms)
+                fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
+            },
+            speed: {
+                visible: true, // bool, default: true (option to hide the speed)
+                fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
+            },
         },
         carImageOptions: {
             model: "m3", // mx, ms (S pre-refresh), ? (S post-refresh)
@@ -107,8 +115,7 @@ Then run `npm ci` inside the new cloned folder, and make sure to add the module 
 ## Ongoing work
 * Display Teslamate "status" topic
 * Add support to selectively enable/disable certain lines
-* ~~Allow display for multiple Teslas~~
-* ~~Add images of module~~
-* ~~Selectively enable/disable certain fields based on other state (for example, still show scheduled charge time if plugged in)~~
-* ~~Format and display Teslamate "scheduled charge time" topic~~
-* ~~Proper Imperial/Metric conversion and formatting~~
+
+## Adds in this fork
+* Added optional speed
+* Added optional TPMS info

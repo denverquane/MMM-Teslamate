@@ -44,6 +44,11 @@ module.exports = NodeHelper.create({
         charge_time:  topicPrefix + carID + '/time_to_full_charge',
 
         update_available: topicPrefix + carID + '/update_available',
+        geofence: topicPrefix + carID + '/geofence',
+        tpms_fl: topicPrefix + carID + '/tpms_pressure_fl',
+        tpms_fr: topicPrefix + carID + '/tpms_pressure_fr',
+        tpms_rl: topicPrefix + carID + '/tpms_pressure_rl',
+        tpms_rr: topicPrefix + carID + '/tpms_pressure_rr',
       };
     },
 
