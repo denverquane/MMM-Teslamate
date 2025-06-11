@@ -465,7 +465,7 @@ Module.register("MMM-Teslamate", {
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
     const teslaOptions = this.config.carImageOptions.options || "PPSW,W32B,SLR1";
 
-    const teslaImageWidth = 720;
+    const teslaImageWidth = 1441;
     const teslaImageUrl = `https://static-assets.tesla.com/v1/compositor/?model=${teslaModel}&view=${teslaView}&size=${teslaImageWidth}&options=${teslaOptions}&bkba_opt=1`;
     const imageOffset = this.config.carImageOptions.verticalOffset || 0;
     const imageOpacity = this.config.carImageOptions.imageOpacity || 0.4;
