@@ -370,7 +370,7 @@ Module.register("MMM-Teslamate", {
       attrList.appendChild(tpmsLi);
     }
 
-    if (this.config.displayOptions.geofence.visible && geofence !== null) {
+    if (this.config.displayOptions.geofence.visible && geofence !== null && geofence !== "") {
       var geofenceLi = document.createElement("li");
       geofenceLi.className = "mattribute";
       geofenceLi.style = lineStyle;
