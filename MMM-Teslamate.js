@@ -291,7 +291,7 @@ Module.register("MMM-Teslamate", {
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
       doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
-      isPreconditioning, geofence, tpms_fl, tpms_fr, tpms_rl, tpms_rr
+      isPreconditioning/*, geofence, tpms_fl, tpms_fr, tpms_rl, tpms_rr*/
     } = data;
 
     const makeSpan = function (className, content) {
@@ -412,7 +412,7 @@ Module.register("MMM-Teslamate", {
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
       doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
-      isPreconditioning, geofence, tpms_fl, tpms_fr, tpms_rl, tpms_rr
+      isPreconditioning/*, geofence, tpms_fl, tpms_fr, tpms_rl, tpms_rr*/
     } = data;
 
     const stateIcons = [];
