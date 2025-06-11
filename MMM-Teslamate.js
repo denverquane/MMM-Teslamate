@@ -309,7 +309,7 @@ Module.register("MMM-Teslamate", {
       returnStr += (diffHrs > 0 ? (diffHrs + " Hour" + (diffHrs > 1 ? "s" : "") + ", ") : "");
       return returnStr + (diffMins > 0 ? (diffMins + " Min" + (diffMins > 1 ? "s" : "")) : "");
     }
-
+    //TODO bother formatting days? Poor trickle chargers...
     const makeChargeRemString = function (remHrs) {
       const hrs = Math.floor(remHrs);
       const mins = Math.ceil((remHrs - hrs) * 60.0);
@@ -496,7 +496,6 @@ Module.register("MMM-Teslamate", {
                     margin-top: ${layBatTopMargin}px;
                     border: 2px solid #aaa;
                     border-radius: ${10 * layBatScaleHeight}px">
-          
           <!-- Plus pole -->
           <div style="position: relative; top: ${(layBatHeight - layBatHeight / 4) / 2 - 1}px; left: ${layBatWidth}px;
                       width: ${8 * layBatScaleWidth}px; height: ${layBatHeight / 4}px;
@@ -505,14 +504,11 @@ Module.register("MMM-Teslamate", {
                       border-bottom-right-radius: ${5 * layBatScaleHeight}px;
                       border-left: none;
                       background: #000">
-                      
-            <!-- does this belong? -->
-            <div style="width: ${8 * layBatScaleWidth}px; height: ${layBatHeight / 4}px;
-                opacity: ${imageOpacity};
-                background-image: url('${teslaImageUrl}');
-                background-size: ${layWidth}px;
-                background-position: -351px ${imageOffset - 152}px"></div>
-
+              <div style="width: ${8 * layBatScaleWidth}px; height: ${layBatHeight / 4}px;
+                          opacity: ${imageOpacity};
+                          background-image: url('${teslaImageUrl}');
+                          background-size: ${layWidth}px;
+                          background-position: -351px ${imageOffset - 152}px"></div>
           </div>
 
           <!-- Inner border -->
@@ -623,6 +619,6 @@ Module.register("MMM-Teslamate", {
           </div>
         </div>
       </div>
-    `;
+		`;
   }
 });
