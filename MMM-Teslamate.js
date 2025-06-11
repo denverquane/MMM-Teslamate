@@ -24,7 +24,7 @@ Module.register("MMM-Teslamate", {
       batWidth: 250,
       batHeight: 75,
       topOffset: -40,
-      fontSize: '1rem', // null (to use default/css) or rem/px
+      fontSize: '.9rem', // null (to use default/css) or rem/px
       lineHeight: '1rem', // null (to use default/css) or rem/px
     },
     displayOptions: {
@@ -315,7 +315,7 @@ Module.register("MMM-Teslamate", {
       return (hrs > 0 ? (hrs + " Hour" + (hrs > 1 ? "s" : "") + ", ") : "") + (mins > 0 ? (mins + " Min" + (mins > 1 ? "s" : "")) : "");
     }
 
-    const fontSize = this.config.sizeOptions.fontSize || '1rem';
+    const fontSize = this.config.sizeOptions.fontSize || '.9rem';
     const lineHeight = this.config.sizeOptions.lineHeight || '1rem';
     const lineStyle = 'font-size: ' + fontSize + ';line-height: ' + lineHeight + ';';
 
