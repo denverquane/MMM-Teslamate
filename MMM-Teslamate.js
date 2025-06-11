@@ -271,8 +271,10 @@ Module.register("MMM-Teslamate", {
     }
 
     console.log(this.name + ": Generating DOM with data: ", data);
+    //always graphic mode
     this.generateGraphicDom(wrapper, data);
 
+    //optionally append the table
     if (this.config.hybridView)
       this.generateTableDom(wrapper, data);
 
@@ -439,11 +441,14 @@ Module.register("MMM-Teslamate", {
     networkIcons.push((state == "offline") ? "signal-off" : "signal");
 
     // size options
+    // size of the icons + battery (above text)
     const layWidth = this.config.sizeOptions.width || 450; // px, default: 450
     const layHeight = this.config.sizeOptions.height || 203; // px, default: 203
+    // the battery images itself
     const layBatWidth = this.config.sizeOptions.batWidth || 250; // px, default: 250
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
     const layBatTopMargin = this.config.displayOptions.batteryBar.topMargin || 0; // px, default: 0
+    // top offset - to reduce visual distance to the module above
     const topOffset = this.config.sizeOptions.topOffset || -40; // px, default: -40
 
     // calculate scales
@@ -456,7 +461,7 @@ Module.register("MMM-Teslamate", {
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
     const teslaOptions = this.config.carImageOptions.options || "PPSW,W32B,SLR1";
 
-    const teslaImageWidth = 720;
+    const teslaImageWidth = 720; // Tesla compositor stopped returning arbitrary-sized images, only steps of 250, 400, 720 etc work now. We use CSS to scale the image to the correct layout width
     const teslaImageUrl = `https://static-assets.tesla.com/v1/compositor/?model=${teslaModel}&view=${teslaView}&size=${teslaImageWidth}&options=${teslaOptions}&bkba_opt=1`;
     const imageOffset = this.config.carImageOptions.verticalOffset || 0;
     const imageOpacity = this.config.carImageOptions.imageOpacity || 0.4;
@@ -464,7 +469,7 @@ Module.register("MMM-Teslamate", {
     const renderedStateIcons = stateIcons.map((icon) => `<span class="mdi mdi-${icon}"></span>`)
     const renderedNetworkIcons = networkIcons.map((icon) => `<span class="mdi mdi-${icon}" ${icon == "alert-box" ? "style='color: #f66'" : ""}></span>`)
 
-    const batteryReserveVisible = (battery - batteryUsable) > 1;
+    const batteryReserveVisible = (battery - batteryUsable) > 1; // at <= 1% reserve the app and the car don't show it, so we won't either
 
     const batteryOverlayIcon = charging ? `<span class="mdi mdi-flash bright light"></span>` :
       batteryReserveVisible ? `<span class="mdi mdi-snowflake bright light"></span>` : '';
@@ -485,20 +490,32 @@ Module.register("MMM-Teslamate", {
     let batteryBarHtml = '';
     if (this.config.displayOptions.batteryBar.visible) {
       batteryBarHtml = `
+        <!-- Battery graphic - outer border -->
         <div style="margin-left: ${(layWidth - layBatWidth) / 2}px;
                     width: ${layBatWidth}px; height: ${layBatHeight}px;
                     margin-top: ${layBatTopMargin}px;
                     border: 2px solid #aaa;
                     border-radius: ${10 * layBatScaleHeight}px">
-
+          
+          <!-- Plus pole -->
           <div style="position: relative; top: ${(layBatHeight - layBatHeight / 4) / 2 - 1}px; left: ${layBatWidth}px;
                       width: ${8 * layBatScaleWidth}px; height: ${layBatHeight / 4}px;
                       border: 2px solid #aaa;
                       border-top-right-radius: ${5 * layBatScaleHeight}px;
                       border-bottom-right-radius: ${5 * layBatScaleHeight}px;
                       border-left: none;
-                      background: #000"></div>
+                      background: #000">
+                      
+            <!-- does this belong? -->
+            <div style="width: ${8 * layBatScaleWidth}px; height: ${layBatHeight / 4}px;
+                opacity: ${imageOpacity};
+                background-image: url('${teslaImageUrl}');
+                background-size: ${layWidth}px;
+                background-position: -351px ${imageOffset - 152}px"></div>
 
+          </div>
+
+          <!-- Inner border -->
           <div style="position: relative; 
                       top: -${23 * layBatScaleHeight}px; 
                       left: 0px;
@@ -508,6 +525,7 @@ Module.register("MMM-Teslamate", {
                       border: 1px solid #aaa;
                       border-radius: ${3 * layBatScaleHeight}px">
 
+            <!-- Green charge rectangle -->
             <div style="position: relative; top: 0px; left: 0px; z-index: 2;
                         width: ${Math.round(layBatScaleWidth * 2.38 * batteryUsable)}px;
                         height: ${layBatHeight - 8 - 2 - 2}px;
@@ -516,6 +534,7 @@ Module.register("MMM-Teslamate", {
                         border-bottom-left-radius: ${2.5 * layBatScaleHeight}px;
                         background-color: #068A00"></div>
 
+            <!-- Blue reserved charge rectangle -->
             <div style="position: relative; 
                         top: -${layBatHeight - 8 - 2 - 2}px; 
                         left: ${Math.round(layBatScaleWidth * 2.38 * batteryUsable)}px; 
@@ -528,6 +547,7 @@ Module.register("MMM-Teslamate", {
                         border-bottom-left-radius: 2.5px;
                         background-color: #366aa5"></div>
 
+            <!-- Charge limit marker -->
             <div style="position: relative; 
                         top: -${(layBatHeight - 8 - 2 - 2) * 2}px; 
                         left: ${Math.round(layBatScaleWidth * 2.38 * chargeLimitSOC) - 1}px;
@@ -535,6 +555,7 @@ Module.register("MMM-Teslamate", {
                         ${chargeLimitSOC === 0 ? "visibility: hidden" : ""}
                         border-left: 1px dashed #888"></div>
 
+            <!-- Battery overlay icon (charging or snowflake) -->
             <div class="medium"
                  style="position: relative; 
                         top: -${(layBatHeight - 8 * layBatScaleHeight - 2 - 2) * 2 + 56 * layBatScaleHeight}px; 
@@ -564,6 +585,7 @@ Module.register("MMM-Teslamate", {
                     background-position: 0px ${imageOffset}px;"></div>
         <div style="z-index: 2; position: relative; top: 0px; left: 0px; margin-top: ${topOffset}px;">
 
+          <!-- Percentage/range -->
           <div style="margin-top: ${50 * layScaleHeight}px; 
                       margin-left: auto; 
                       text-align: center; 
@@ -572,6 +594,7 @@ Module.register("MMM-Teslamate", {
             <span class="bright large light">${batteryBigNumber}</span><span class="normal medium">${batteryUnit}</span>
           </div>
 
+          <!-- State icons -->
           <div style="float: left; 
                       margin-top: -${65 * layScaleHeight}px; 
                       margin-left: ${((layWidth - layBatWidth) / 2) - 5}px; 
@@ -580,6 +603,7 @@ Module.register("MMM-Teslamate", {
             ${renderedStateIcons.join(" ")}
           </div>
 
+          <!-- Online state icon -->
           <div style="float: right; 
                       margin-top: -${65 * layScaleHeight}px; 
                       margin-right: ${((layWidth - layBatWidth) / 2) - 5}px; 
@@ -590,6 +614,7 @@ Module.register("MMM-Teslamate", {
 
           ${batteryBarHtml}
 
+          <!-- Optional graphic mode icons below the car -->
           <div style="text-align: center; 
                       margin-top: ${this.config.displayOptions.temperatureIcons.topMargin || 0}px;
                       ${temperatureIcons == "" ? 'display: none;' : ''}
