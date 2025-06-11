@@ -192,8 +192,7 @@ Module.register("MMM-Teslamate", {
     };
 
     const barToPSI = function (bar, fixed) {
-      //return (bar * 14.503773773).toFixed(fixed);
-      return bar;
+      return (bar * 14.503773773).toFixed(fixed);
     };
 
     const wrapper = document.createElement('div');
