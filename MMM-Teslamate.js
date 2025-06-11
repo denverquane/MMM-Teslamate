@@ -222,7 +222,7 @@ Module.register("MMM-Teslamate", {
     const isPreconditioning = this.subscriptions["preconditioning"].value;
     const isHealthy = this.subscriptions["health"].value;
     const isUpdateAvailable = this.subscriptions["update_available"].value;
-    const geofence = "",//this.subscriptions["geofence"].value;
+    const geofence = "";//this.subscriptions["geofence"].value;
 
     var idealRange = this.subscriptions["ideal_range"].value ? this.subscriptions["ideal_range"].value : 0;
     var estRange = this.subscriptions["est_range"].value ? this.subscriptions["est_range"].value : 0;
