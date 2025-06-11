@@ -357,7 +357,7 @@ Module.register("MMM-Teslamate", {
 
       attrList.appendChild(odometerLi);
     }
-/*   
+   
     if (this.config.displayOptions.tpms.visible) {
       var tpmsLi = document.createElement("li");
       tpmsLi.className = "mattribute";
@@ -371,7 +371,7 @@ Module.register("MMM-Teslamate", {
 
       attrList.appendChild(tpmsLi);
     }
-
+/*
     if (this.config.displayOptions.geofence.visible && geofence !== null) {
       var geofenceLi = document.createElement("li");
       geofenceLi.className = "mattribute";
