@@ -449,6 +449,8 @@ Module.register("MMM-Teslamate", {
     // size options
     const layWidth = this.config.sizeOptions.width || 450; // px, default: 450
     const layHeight = this.config.sizeOptions.height || 203; // px, default: 203
+    const layScaleHeight = this.config.sizeOptions.scaleHeight || 1; // px, default: 1
+    const layScaleWidth = this.config.sizeOptions.scaleWidth || 1; // px, default: 1
     const layBatWidth = this.config.sizeOptions.batWidth || 250; // px, default: 250
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
     const layBatTopMargin = this.config.displayOptions.batteryBar.topMargin || 0; // px, default: 0
