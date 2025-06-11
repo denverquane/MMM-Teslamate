@@ -24,8 +24,6 @@ Module.register("MMM-Teslamate", {
       batWidth: 250,
       batHeight: 75,
       topOffset: -40,
-      scaleHeight: 0,
-      scaleWidth: 0,
     },
     displayOptions: {
       odometer: {
@@ -35,8 +33,6 @@ Module.register("MMM-Teslamate", {
       batteryBar: {
         visible: true,
         topMargin: 0,
-        scaleHeight: 0,
-        scaleWidth: 1,
       },
       temperatureIcons: {
         topMargin: 0,
@@ -452,20 +448,16 @@ Module.register("MMM-Teslamate", {
     // size options
     const layWidth = this.config.sizeOptions.width || 450; // px, default: 450
     const layHeight = this.config.sizeOptions.height || 203; // px, default: 203
-    //const layScaleHeight = this.config.sizeOptions.scaleHeight || 0; // px, default: 0
-    //const layScaleWidth = this.config.sizeOptions.scaleWidth || 0; // px, default: 0
     const layBatWidth = this.config.sizeOptions.batWidth || 250; // px, default: 250
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
     const layBatTopMargin = this.config.displayOptions.batteryBar.topMargin || 0; // px, default: 0
-    //const layBatScaleHeight = this.config.displayOptions.batteryBar.scaleHeight || 0; // px, default: 0
-    //const layBatScaleWidth = this.config.displayOptions.batteryBar.scaleWidth || 1; // px, default: 1
     const topOffset = this.config.sizeOptions.topOffset || -40; // px, default: -40
 
     // calculate scales
-        var layBatScaleWidth = layBatWidth / 250;  // scale factor normalized to 250
-        var layBatScaleHeight = layBatHeight / 75; // scale factor normalized to 75
-        var layScaleWidth = layWidth / 450;        // scale factor normalized to 203
-        var layScaleHeight = layHeight / 203;      // scale factor normalized to 203
+    var layBatScaleWidth = layBatWidth / 250;  // scale factor normalized to 250
+    var layBatScaleHeight = layBatHeight / 75; // scale factor normalized to 75
+    var layScaleWidth = layWidth / 450;        // scale factor normalized to 203
+    var layScaleHeight = layHeight / 203;      // scale factor normalized to 203
 
     const teslaModel = this.config.carImageOptions.model || "m3";
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
