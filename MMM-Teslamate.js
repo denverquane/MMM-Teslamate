@@ -377,7 +377,7 @@ Module.register("MMM-Teslamate", {
       if (this.config.displayOptions.geofence.fontSize !== null) {
         geofenceLi.style = 'font-size: ' + parseFloat(this.config.displayOptions.geofence.fontSize) + 'rem';
       }
-/*
+
       geofenceLi.appendChild(makeSpan("icon zmdi zmdi-my-location zmdi-hc-fw", ""));
       geofenceLi.appendChild(makeSpan("name", "Location"));
       geofenceLi.appendChild(makeSpan("value", geofence));
@@ -398,7 +398,7 @@ Module.register("MMM-Teslamate", {
 
       attrList.appendChild(speedLi);
     }
-*/
+
     wrapper.appendChild(attrList);
   },
 
