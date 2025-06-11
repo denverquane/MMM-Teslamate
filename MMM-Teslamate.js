@@ -24,11 +24,12 @@ Module.register("MMM-Teslamate", {
       batWidth: 250,
       batHeight: 75,
       topOffset: -40,
+      fontSize: 1rem, // null (to use default/css) or rem/px
+      lineHeight: 1rem, // null (to use default/css) or rem/px
     },
     displayOptions: {
       odometer: {
         visible: true,
-        fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
       },
       batteryBar: {
         visible: true,
@@ -39,15 +40,12 @@ Module.register("MMM-Teslamate", {
       },
       tpms: {
         visible: true,
-        fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
       },
       speed: {
         visible: true,
-        fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
       },
       geofence: {
         visible: true,
-        fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
       },
     },
     showTemps: "hvac_on",
@@ -317,19 +315,23 @@ Module.register("MMM-Teslamate", {
       return (hrs > 0 ? (hrs + " Hour" + (hrs > 1 ? "s" : "") + ", ") : "") + (mins > 0 ? (mins + " Min" + (mins > 1 ? "s" : "")) : "");
     }
 
+    const fontSize = this.config.sizeOptions.fontSize || '1rem';
+    const lineHeight = this.config.sizeOptions.lineHeight || '1rem';
+
     var attrList = document.createElement("ul");
     attrList.className = "mattributes";
-    attrList.style = 'font-size: ' + 1 + 'rem; line-height: 1.1rem;';
 
     if (charging) {
       var energyAddedLi = document.createElement("li");
       energyAddedLi.className = "mattribute";
+      energyAddedLi.style = 'font-size: ' + fontSize + '; line-height: ' + lineHeight;
       energyAddedLi.appendChild(makeSpan("icon zmdi zmdi-input-power zmdi-hc-fw", ""));
       energyAddedLi.appendChild(makeSpan("name", "Charge Added"));
       energyAddedLi.appendChild(makeSpan("value", energyAdded + " kWh"));
 
       var timeToFullLi = document.createElement("li");
       timeToFullLi.className = "mattribute";
+      timeToFullLi.style = 'font-size: ' + fontSize + '; line-height: ' + lineHeight;
       timeToFullLi.appendChild(makeSpan("icon zmdi zmdi-time zmdi-hc-fw", ""));
       timeToFullLi.appendChild(makeSpan("name", "Time to " + chargeLimitSOC + "%"));
       timeToFullLi.appendChild(makeSpan("value", makeChargeRemString(timeToFull)));
@@ -338,6 +340,7 @@ Module.register("MMM-Teslamate", {
     } else if (pluggedIn && chargeStart && chargeStart !== "") {
       var chargeStartLi = document.createElement("li");
       chargeStartLi.className = "mattribute";
+      chargeStartLi.style = 'font-size: ' + fontSize + '; line-height: ' + lineHeight;
       chargeStartLi.appendChild(makeSpan("icon zmdi zmdi-time zmdi-hc-fw", ""));
       chargeStartLi.appendChild(makeSpan("name", "Charge Starting"));
       chargeStartLi.appendChild(makeSpan("value", makeChargeStartString(chargeStart)));
@@ -347,9 +350,9 @@ Module.register("MMM-Teslamate", {
     if (this.config.displayOptions.odometer.visible) {
       var odometerLi = document.createElement("li");
       odometerLi.className = "mattribute";
-      if (this.config.displayOptions.odometer.fontSize !== null) {
-        odometerLi.style = 'font-size: ' + parseFloat(this.config.displayOptions.odometer.fontSize) + 'rem';
-      }
+      //if (this.config.displayOptions.odometer.fontSize !== null) {
+        odometerLi.style = 'font-size: ' + fontSize + '; line-height: ' + lineHeight;
+      //}
 
       odometerLi.appendChild(makeSpan("icon zmdi zmdi-dot-circle-alt zmdi-hc-fw", ""));
       odometerLi.appendChild(makeSpan("name", "Odometer"));
@@ -361,9 +364,9 @@ Module.register("MMM-Teslamate", {
     if (this.config.displayOptions.tpms.visible) {
       var tpmsLi = document.createElement("li");
       tpmsLi.className = "mattribute";
-      if (this.config.displayOptions.tpms.fontSize !== null) {
-        tpmsLi.style = 'font-size: ' + parseFloat(this.config.displayOptions.tpms.fontSize) + 'rem';
-      }
+      //if (this.config.displayOptions.tpms.fontSize !== null) {
+        tpmsLi.style = 'font-size: ' + fontSize + '; line-height: ' + lineHeight;
+      //}
 
       tpmsLi.appendChild(makeSpan("icon zmdi zmdi-star-circle zmdi-hc-fw", ""));
       tpmsLi.appendChild(makeSpan("name", "TPMS"));
@@ -375,9 +378,9 @@ Module.register("MMM-Teslamate", {
     if (this.config.displayOptions.geofence.visible && geofence !== null) {
       var geofenceLi = document.createElement("li");
       geofenceLi.className = "mattribute";
-      if (this.config.displayOptions.geofence.fontSize !== null) {
-        geofenceLi.style = 'font-size: ' + parseFloat(this.config.displayOptions.geofence.fontSize) + 'rem';
-      }
+      //if (this.config.displayOptions.geofence.fontSize !== null) {
+        geofenceLi.style = 'font-size: ' + fontSize + '; line-height: ' + lineHeight;
+      //}
 
       geofenceLi.appendChild(makeSpan("icon zmdi zmdi-my-location zmdi-hc-fw", ""));
       geofenceLi.appendChild(makeSpan("name", "Location"));
@@ -389,9 +392,9 @@ Module.register("MMM-Teslamate", {
     if (this.config.displayOptions.speed.visible && state == "driving") {
       var speedLi = document.createElement("li");
       speedLi.className = "mattribute";
-      if (this.config.displayOptions.speed.fontSize !== null) {
-        speedLi.style = 'font-size: ' + parseFloat(this.config.displayOptions.speed.fontSize) + 'rem';
-      }
+      //if (this.config.displayOptions.speed.fontSize !== null) {
+        speedLi.style = 'font-size: ' + fontSize + '; line-height: ' + lineHeight;
+      //}
 
       speedLi.appendChild(makeSpan("icon zmdi zmdi-run zmdi-hc-fw", ""));
       speedLi.appendChild(makeSpan("name", "Speed"));
