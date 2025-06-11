@@ -222,7 +222,7 @@ Module.register("MMM-Teslamate", {
     const isPreconditioning = this.subscriptions["preconditioning"].value;
     const isHealthy = this.subscriptions["health"].value;
     const isUpdateAvailable = this.subscriptions["update_available"].value;
-    const geofence = "";//this.subscriptions["geofence"].value;
+    const geofence = this.subscriptions["geofence"].value;
 
     var idealRange = this.subscriptions["ideal_range"].value ? this.subscriptions["ideal_range"].value : 0;
     var estRange = this.subscriptions["est_range"].value ? this.subscriptions["est_range"].value : 0;
@@ -231,10 +231,10 @@ Module.register("MMM-Teslamate", {
     var inside_temp = this.subscriptions["inside_temp"].value ? this.subscriptions["inside_temp"].value : 0;
     var odometer = this.subscriptions["odometer"].value ? this.subscriptions["odometer"].value : 0;
 
-    var tpms_fl = 0;//this.subscriptions["tpms_fl"].value ? this.subscriptions["tpms_fl"].value : 0;
-    var tpms_fr = 0;//this.subscriptions["tpms_fr"].value ? this.subscriptions["tpms_fr"].value : 0;
-    var tpms_rl = 0;//this.subscriptions["tpms_rl"].value ? this.subscriptions["tpms_rl"].value : 0;
-    var tpms_rr = 0;//this.subscriptions["tpms_rr"].value ? this.subscriptions["tpms_rr"].value : 0;
+    var tpms_fl = this.subscriptions["tpms_pressure_fl"].value ? this.subscriptions["tpms_pressure_fl"].value : 0;
+    var tpms_fr = this.subscriptions["tpms_pressure_fr"].value ? this.subscriptions["tpms_pressure_fr"].value : 0;
+    var tpms_rl = this.subscriptions["tpms_pressure_rl"].value ? this.subscriptions["tpms_pressure_rl"].value : 0;
+    var tpms_rr = this.subscriptions["tpms_pressure_rr"].value ? this.subscriptions["tpms_pressure_rr"].value : 0;
 
     if (!this.config.imperial) {
       idealRange = (idealRange * 1.0).toFixed(0);
