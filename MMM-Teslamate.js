@@ -24,8 +24,8 @@ Module.register("MMM-Teslamate", {
       batWidth: 250,
       batHeight: 75,
       topOffset: -40,
-      fontSize: 1rem, // null (to use default/css) or rem/px
-      lineHeight: 1rem, // null (to use default/css) or rem/px
+      fontSize: '1rem', // null (to use default/css) or rem/px
+      lineHeight: '1rem', // null (to use default/css) or rem/px
     },
     displayOptions: {
       odometer: {
