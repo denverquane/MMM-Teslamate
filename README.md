@@ -24,7 +24,7 @@ I use this module and Teslamate daily, so new MQTT topics should be added fairly
 
 Clone this repo into your MagicMirror modules directory using:
 
-```git clone https://github.com/denverquane/MMM-Teslamate.git```
+```git clone https://github.com/maxbethge/MMM-Teslamate.git```
 
 Then run `npm ci` inside the new cloned folder, and make sure to add the module to your MagicMirror config (config/config.js), using configuration similar to that in the Configuration section below.
 
