@@ -24,7 +24,7 @@ I use this module and Teslamate daily, so new MQTT topics should be added fairly
 
 Clone this repo into your MagicMirror modules directory using:
 
-```git clone https://github.com/maxbethge/MMM-Teslamate.git```
+```git clone https://github.com/denverquane/MMM-Teslamate.git```
 
 Then run `npm ci` inside the new cloned folder, and make sure to add the module to your MagicMirror config (config/config.js), using configuration similar to that in the Configuration section below.
 
@@ -111,7 +111,8 @@ Then run `npm ci` inside the new cloned folder, and make sure to add the module 
 ## Ongoing work
 * Display Teslamate "status" topic
 * Add support to selectively enable/disable certain lines
-
-## Adds in this fork
-* Added optional speed
-* Added optional TPMS info
+* ~~Allow display for multiple Teslas~~
+* ~~Add images of module~~
+* ~~Selectively enable/disable certain fields based on other state (for example, still show scheduled charge time if plugged in)~~
+* ~~Format and display Teslamate "scheduled charge time" topic~~
+* ~~Proper Imperial/Metric conversion and formatting~~
