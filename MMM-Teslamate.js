@@ -192,7 +192,8 @@ Module.register("MMM-Teslamate", {
     };
 
     const barToPSI = function (bar, fixed) {
-      return (bar * 14.503773773).toFixed(fixed);
+      //return (bar * 14.503773773).toFixed(fixed);
+      return bar;
     };
 
     const wrapper = document.createElement('div');
@@ -221,7 +222,7 @@ Module.register("MMM-Teslamate", {
     const isPreconditioning = this.subscriptions["preconditioning"].value;
     const isHealthy = this.subscriptions["health"].value;
     const isUpdateAvailable = this.subscriptions["update_available"].value;
-    const geofence = this.subscriptions["geofence"].value;
+    const geofence = "",//this.subscriptions["geofence"].value;
 
     var idealRange = this.subscriptions["ideal_range"].value ? this.subscriptions["ideal_range"].value : 0;
     var estRange = this.subscriptions["est_range"].value ? this.subscriptions["est_range"].value : 0;
@@ -230,10 +231,10 @@ Module.register("MMM-Teslamate", {
     var inside_temp = this.subscriptions["inside_temp"].value ? this.subscriptions["inside_temp"].value : 0;
     var odometer = this.subscriptions["odometer"].value ? this.subscriptions["odometer"].value : 0;
 
-    var tpms_fl = this.subscriptions["tpms_fl"].value ? this.subscriptions["tpms_fl"].value : 0;
-    var tpms_fr = this.subscriptions["tpms_fr"].value ? this.subscriptions["tpms_fr"].value : 0;
-    var tpms_rl = this.subscriptions["tpms_rl"].value ? this.subscriptions["tpms_rl"].value : 0;
-    var tpms_rr = this.subscriptions["tpms_rr"].value ? this.subscriptions["tpms_rr"].value : 0;
+    var tpms_fl = 0;//this.subscriptions["tpms_fl"].value ? this.subscriptions["tpms_fl"].value : 0;
+    var tpms_fr = 0;//this.subscriptions["tpms_fr"].value ? this.subscriptions["tpms_fr"].value : 0;
+    var tpms_rl = 0;//this.subscriptions["tpms_rl"].value ? this.subscriptions["tpms_rl"].value : 0;
+    var tpms_rr = 0;//this.subscriptions["tpms_rr"].value ? this.subscriptions["tpms_rr"].value : 0;
 
     if (!this.config.imperial) {
       idealRange = (idealRange * 1.0).toFixed(0);
@@ -244,10 +245,10 @@ Module.register("MMM-Teslamate", {
       outside_temp = (outside_temp * 1.0).toFixed(1);
       inside_temp = (inside_temp * 1.0).toFixed(1);
 
-      tpms_fl = (tpms_fl * 1.0).toFixed(1);
-      tpms_fr = (tpms_fr * 1.0).toFixed(1);
-      tpms_rl = (tpms_rl * 1.0).toFixed(1);
-      tpms_rr = (tpms_rr * 1.0).toFixed(1);
+      //tpms_fl = (tpms_fl * 1.0).toFixed(1);
+      //tpms_fr = (tpms_fr * 1.0).toFixed(1);
+      //tpms_rl = (tpms_rl * 1.0).toFixed(1);
+      //tpms_rr = (tpms_rr * 1.0).toFixed(1);
     } else {
       idealRange = kmToMiFixed(idealRange, 0);
       estRange = kmToMiFixed(estRange, 0);
@@ -257,10 +258,10 @@ Module.register("MMM-Teslamate", {
       outside_temp = cToFFixed(outside_temp, 1);
       inside_temp = cToFFixed(inside_temp, 1);
 
-      tpms_fl = barToPSI(tpms_fl,1);
-      tpms_fr = barToPSI(tpms_fr,1);
-      tpms_rl = barToPSI(tpms_rl,1);
-      tpms_rr = barToPSI(tpms_rr,1);
+      //tpms_fl = barToPSI(tpms_fl,1);
+      //tpms_fr = barToPSI(tpms_fr,1);
+      //tpms_rl = barToPSI(tpms_rl,1);
+      //tpms_rr = barToPSI(tpms_rr,1);
     }
 
     const data = {
