@@ -458,7 +458,7 @@ Module.register("MMM-Teslamate", {
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
     const layBatTopMargin = this.config.displayOptions.batteryBar.topMargin || 0; // px, default: 0
     const layBatScaleHeight = this.config.displayOptions.batteryBar.scaleHeight || 0; // px, default: 0
-    const layBatScaleWidth = this.config.displayOptions.batteryBar.scaleWidth || 0; // px, default: 0
+    const layBatScaleWidth = this.config.displayOptions.batteryBar.scaleWidth || 1; // px, default: 1
     const topOffset = this.config.sizeOptions.topOffset || -40; // px, default: -40
 
     const teslaModel = this.config.carImageOptions.model || "m3";
