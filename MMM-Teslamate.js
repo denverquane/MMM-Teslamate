@@ -449,13 +449,13 @@ Module.register("MMM-Teslamate", {
     // size options
     const layWidth = this.config.sizeOptions.width || 450; // px, default: 450
     const layHeight = this.config.sizeOptions.height || 203; // px, default: 203
-    const layScaleHeight = this.config.sizeOptions.scaleHeight || 1; // px, default: 1
-    const layScaleWidth = this.config.sizeOptions.scaleWidth || 1; // px, default: 1
+    const layScaleHeight = this.config.sizeOptions.scaleHeight || 0; // px, default: 0
+    const layScaleWidth = this.config.sizeOptions.scaleWidth || 0; // px, default: 0
     const layBatWidth = this.config.sizeOptions.batWidth || 250; // px, default: 250
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
     const layBatTopMargin = this.config.displayOptions.batteryBar.topMargin || 0; // px, default: 0
-    const layBatScaleHeight = this.config.displayOptions.batteryBar.scaleHeight || 1; // px, default: 1
-    const layBatScaleWidth = this.config.displayOptions.batteryBar.scaleWidth || 1; // px, default: 1
+    const layBatScaleHeight = this.config.displayOptions.batteryBar.scaleHeight || 0; // px, default: 0
+    const layBatScaleWidth = this.config.displayOptions.batteryBar.scaleWidth || 0; // px, default: 0
     const topOffset = this.config.sizeOptions.topOffset || -40; // px, default: -40
 
     const teslaModel = this.config.carImageOptions.model || "m3";
@@ -504,7 +504,7 @@ Module.register("MMM-Teslamate", {
                       border-bottom-right-radius: ${5 * layBatScaleHeight}px;
                       border-left: none;
                       background: #000"></div>
-
+<!--
           <div style="position: relative; 
                       top: -${23 * layBatScaleHeight}px; 
                       left: 0px;
@@ -513,13 +513,22 @@ Module.register("MMM-Teslamate", {
                       width: ${(layBatWidth - 12)}px; height: ${layBatHeight - 8 - 2 - 2}px;
                       border: 1px solid #aaa;
                       border-radius: ${3 * layBatScaleHeight}px">
-
+-->
+<!--
             <div style="position: relative; top: 0px; left: 0px; z-index: 2;
                         width: ${Math.round(layBatScaleWidth * 2.38 * batteryUsable)}px;
                         height: ${layBatHeight - 8 - 2 - 2}px;
                         opacity: 0.8;
                         border-top-left-radius: ${2.5 * layBatScaleHeight}px;
                         border-bottom-left-radius: ${2.5 * layBatScaleHeight}px;
+                        background-color: #068A00"></div>
+-->
+            <div style="position: relative; top: 0px; left: 0px; z-index: 2;
+                        width: ${Math.round(layBatScaleWidth * 2.38 * batteryUsable)}px;
+                        height: ${layBatHeight - 2}px;
+                        opacity: 0.8;
+                        border-top-right-radius: ${5 * layBatScaleHeight}px;
+                        border-bottom-right-radius: ${5 * layBatScaleHeight}px;
                         background-color: #068A00"></div>
 
             <div style="position: relative; 
