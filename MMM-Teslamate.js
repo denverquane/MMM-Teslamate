@@ -36,7 +36,7 @@ Module.register("MMM-Teslamate", {
         visible: true,
         topMargin: 0,
         scaleHeight: 0,
-        scaleWidth: 0,
+        scaleWidth: 1,
       },
       temperatureIcons: {
         topMargin: 0,
