@@ -319,6 +319,7 @@ Module.register("MMM-Teslamate", {
 
     var attrList = document.createElement("ul");
     attrList.className = "mattributes";
+    attrList.style = 'font-size: ' + 1 + 'rem; line-height: 1.1rem;';
 
     if (charging) {
       var energyAddedLi = document.createElement("li");
