@@ -317,6 +317,7 @@ Module.register("MMM-Teslamate", {
 
     const fontSize = this.config.sizeOptions.fontSize || '1rem';
     const lineHeight = this.config.sizeOptions.lineHeight || '1rem';
+    const lineStyle = 'font-size: ' + fontSize + ';line-height: ' + lineHeight + ';';
 
     var attrList = document.createElement("ul");
     attrList.className = "mattributes";
@@ -324,14 +325,14 @@ Module.register("MMM-Teslamate", {
     if (charging) {
       var energyAddedLi = document.createElement("li");
       energyAddedLi.className = "mattribute";
-      energyAddedLi.style = 'font-size: ' + fontSize + ';line-height: ' + lineHeight + ';';
+      energyAddedLi.style = lineStyle;
       energyAddedLi.appendChild(makeSpan("icon zmdi zmdi-input-power zmdi-hc-fw", ""));
       energyAddedLi.appendChild(makeSpan("name", "Charge Added"));
       energyAddedLi.appendChild(makeSpan("value", energyAdded + " kWh"));
 
       var timeToFullLi = document.createElement("li");
       timeToFullLi.className = "mattribute";
-      timeToFullLi.style = 'font-size: ' + fontSize + ';line-height: ' + lineHeight + ';';
+      timeToFullLi.style = lineStyle;
       timeToFullLi.appendChild(makeSpan("icon zmdi zmdi-time zmdi-hc-fw", ""));
       timeToFullLi.appendChild(makeSpan("name", "Time to " + chargeLimitSOC + "%"));
       timeToFullLi.appendChild(makeSpan("value", makeChargeRemString(timeToFull)));
@@ -340,7 +341,7 @@ Module.register("MMM-Teslamate", {
     } else if (pluggedIn && chargeStart && chargeStart !== "") {
       var chargeStartLi = document.createElement("li");
       chargeStartLi.className = "mattribute";
-      chargeStartLi.style = 'font-size: ' + fontSize + ';line-height: ' + lineHeight + ';';
+      chargeStartLi.style = lineStyle;
       chargeStartLi.appendChild(makeSpan("icon zmdi zmdi-time zmdi-hc-fw", ""));
       chargeStartLi.appendChild(makeSpan("name", "Charge Starting"));
       chargeStartLi.appendChild(makeSpan("value", makeChargeStartString(chargeStart)));
@@ -350,10 +351,7 @@ Module.register("MMM-Teslamate", {
     if (this.config.displayOptions.odometer.visible) {
       var odometerLi = document.createElement("li");
       odometerLi.className = "mattribute";
-      //if (this.config.displayOptions.odometer.fontSize !== null) {
-        odometerLi.style = 'font-size: ' + fontSize + ';line-height: ' + lineHeight + ';';
-      //}
-
+      odometerLi.style = lineStyle;
       odometerLi.appendChild(makeSpan("icon zmdi zmdi-dot-circle-alt zmdi-hc-fw", ""));
       odometerLi.appendChild(makeSpan("name", "Odometer"));
       odometerLi.appendChild(makeSpan("value", odometer + (!this.config.imperial ? " Km" : " Mi")));
@@ -364,10 +362,7 @@ Module.register("MMM-Teslamate", {
     if (this.config.displayOptions.tpms.visible) {
       var tpmsLi = document.createElement("li");
       tpmsLi.className = "mattribute";
-      //if (this.config.displayOptions.tpms.fontSize !== null) {
- //       tpmsLi.style = 'font-size: ' + fontSize + ';line-height: ' + lineHeight + ';';
-      //}
-
+      tpmsLi.style = lineStyle;
       tpmsLi.appendChild(makeSpan("icon zmdi zmdi-star-circle zmdi-hc-fw", ""));
       tpmsLi.appendChild(makeSpan("name", "TPMS"));
       tpmsLi.appendChild(makeSpan("value", tpms_pressure_fl + ", " + tpms_pressure_fr + ", " + tpms_pressure_rl + ", " + tpms_pressure_rr + (!this.config.imperial ? " (bar)" : " (psi)")));
@@ -378,10 +373,7 @@ Module.register("MMM-Teslamate", {
     if (this.config.displayOptions.geofence.visible && geofence !== null) {
       var geofenceLi = document.createElement("li");
       geofenceLi.className = "mattribute";
-      //if (this.config.displayOptions.geofence.fontSize !== null) {
- //       geofenceLi.style = 'font-size: ' + fontSize + ';line-height: ' + lineHeight + ';';
-      //}
-
+      geofenceLi.style = lineStyle;
       geofenceLi.appendChild(makeSpan("icon zmdi zmdi-my-location zmdi-hc-fw", ""));
       geofenceLi.appendChild(makeSpan("name", "Location"));
       geofenceLi.appendChild(makeSpan("value", geofence));
@@ -392,10 +384,7 @@ Module.register("MMM-Teslamate", {
     if (this.config.displayOptions.speed.visible && state == "driving") {
       var speedLi = document.createElement("li");
       speedLi.className = "mattribute";
-      //if (this.config.displayOptions.speed.fontSize !== null) {
- //       speedLi.style = 'font-size: ' + fontSize + ';line-height: ' + lineHeight + ';';
-      //}
-
+      speedLi.style = lineStyle;
       speedLi.appendChild(makeSpan("icon zmdi zmdi-run zmdi-hc-fw", ""));
       speedLi.appendChild(makeSpan("name", "Speed"));
       speedLi.appendChild(makeSpan("value", speed + (!this.config.imperial ? " km/h" : " mph")));
