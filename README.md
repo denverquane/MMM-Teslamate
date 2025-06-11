@@ -61,11 +61,12 @@ Then run `npm ci` inside the new cloned folder, and make sure to add the module 
             batHeight: 75, // px, default: 75
             // visual distance reduction to the module above
             topOffset: -40, // px, default: -40
+            fontSize: '.9rem', // null (to use default/css) or rem/px
+            lineHeight: '1rem', // null (to use default/css) or rem/px
         },
         displayOptions: {
             odometer: {
                 visible: true, // bool, default: true (option to hide the odometer)
-                fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
             },
             batteryBar: {
                 visible: true, // bool, default: true (option to hide the battery-bar)
@@ -76,37 +77,28 @@ Then run `npm ci` inside the new cloned folder, and make sure to add the module 
             },
             tpms: {
                 visible: true, // bool, default: true (option to hide the tpms)
-                fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
             },
             speed: {
                 visible: true, // bool, default: true (option to hide the speed)
-                fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
             },
             geofence: {
                 visible: true, // bool, default: true (option to hide the speed)
-                fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
             }
         },
         carImageOptions: {
             model: "m3", // mx, ms (S pre-refresh), ? (S post-refresh)
-
             view: "STUD_3QTR", // STUD_SIDE works better for S/X
-
             // full list of option codes: https://tesla-api.timdorr.com/vehicle/optioncodes.
             // you need at least the color and the wheels. not all combos work.
             // also consult: https://teslaownersonline.com/threads/teslas-image-compositor.7089/
             options: "PPSW,PFP31,W38B,DV4W",
-
             // play with this until it looks about right.
             // tested values: 0 for m3/STUD_3QTR, 25 for ms/STUD_SIDE
             verticalOffset: 0,
-
             opacity: 0.5
         },
-
         // show inside and outside temperatures below the car image: when AC or preconditioning is running (default), always, or never
         showTemps: "hvac_on", // "always", "never"
-
         // time in seconds to wait before re-rendering the module on incoming data. prevents high CPU load due to re-rendering on every new data point during driving
         updatePeriod: 5,
     }
