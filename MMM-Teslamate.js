@@ -504,7 +504,7 @@ Module.register("MMM-Teslamate", {
                       border-bottom-right-radius: ${5 * layBatScaleHeight}px;
                       border-left: none;
                       background: #000"></div>
-<!--
+
           <div style="position: relative; 
                       top: -${23 * layBatScaleHeight}px; 
                       left: 0px;
@@ -513,7 +513,7 @@ Module.register("MMM-Teslamate", {
                       width: ${(layBatWidth - 12)}px; height: ${layBatHeight - 8 - 2 - 2}px;
                       border: 1px solid #aaa;
                       border-radius: ${3 * layBatScaleHeight}px">
--->
+
             <div style="position: relative; top: 0px; left: 0px; z-index: 2;
                         width: ${Math.round(layBatScaleWidth * 2.38 * batteryUsable)}px;
                         height: ${layBatHeight - 8 - 2 - 2}px;
