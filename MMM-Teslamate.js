@@ -367,7 +367,7 @@ Module.register("MMM-Teslamate", {
 
       tpmsLi.appendChild(makeSpan("icon zmdi zmdi-star-cirle zmdi-hc-fw", ""));
       tpmsLi.appendChild(makeSpan("name", "TPMS"));
-      tpmsLi.appendChild(makeSpan("value", tpms_fl + ", " + tpms_fr + ", " + tpms_rl + ", " + tpms_rr + (!this.config.imperial ? " (bar)" : " (psi)")));
+      tpmsLi.appendChild(makeSpan("value", tpms_pressure_fl + ", " + tpms_pressure_fr + ", " + tpms_pressure_rl + ", " + tpms_pressure_rr + (!this.config.imperial ? " (bar)" : " (psi)")));
 
       attrList.appendChild(tpmsLi);
     }
