@@ -1,9 +1,11 @@
 Module.register("MMM-Teslamate", {
 
   getScripts: function () {
+    console.log(this.name + ": getScripts called");
     return [];
   },
   getStyles: function () {
+    console.log(this.name + ": getStyles called");
     return [
       'https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css',
       'Teslamate.css',
@@ -22,11 +24,12 @@ Module.register("MMM-Teslamate", {
       batWidth: 250,
       batHeight: 75,
       topOffset: -40,
+      fontSize: '.9rem', // null (to use default/css) or rem/px
+      lineHeight: '1rem', // null (to use default/css) or rem/px
     },
     displayOptions: {
       odometer: {
         visible: true,
-        fontSize: null, // null (to use default/css) or numeric rem-value (default value is 1.8)
       },
       batteryBar: {
         visible: true,
@@ -34,17 +37,28 @@ Module.register("MMM-Teslamate", {
       },
       temperatureIcons: {
         topMargin: 0,
-      }
+      },
+      tpms: {
+        visible: true,
+      },
+      speed: {
+        visible: true,
+      },
+      geofence: {
+        visible: true,
+      },
     },
     showTemps: "hvac_on",
     updatePeriod: 5,
   },
 
   makeServerKey: function (server) {
+    console.log(this.name + ": makeServerKey called with server: ", server);
     return '' + server.address + ':' + (server.port ?? '1883');
   },
 
   start: function () {
+    console.log(this.name + ": start called");
     const topicPrefix = 'teslamate/cars/' + this.config.carID;
 
     const Topics = {
@@ -80,18 +94,18 @@ Module.register("MMM-Teslamate", {
       plugged_in: topicPrefix + '/plugged_in',
       charge_added: topicPrefix + '/charge_energy_added',
       charge_limit: topicPrefix + '/charge_limit_soc',
-      // charge_port: 'teslamate/cars/1/charge_port_door_open',
-      // charge_current: 'teslamate/cars/1/charger_actual_current',
-      // charge_phases: 'teslamate/cars/1/charger_phases',
-      // charge_power: 'teslamate/cars/1/charger_power',
-      // charge_voltage: 'teslamate/cars/1/charger_voltage',
       charge_start: topicPrefix + '/scheduled_charging_start_time',
       charge_time: topicPrefix + '/time_to_full_charge',
 
       update_available: topicPrefix + '/update_available',
+      geofence: topicPrefix + '/geofence',
+      tpms_pressure_fl: topicPrefix + '/tpms_pressure_fl',
+      tpms_pressure_fr: topicPrefix + '/tpms_pressure_fr',
+      tpms_pressure_rl: topicPrefix + '/tpms_pressure_rl',
+      tpms_pressure_rr: topicPrefix + '/tpms_pressure_rr',
     };
 
-    console.log(this.name + ' started.');
+    console.log(this.name + ": Topics initialized");
     this.subscriptions = {
       lat: {},
       lon: {},
@@ -99,13 +113,13 @@ Module.register("MMM-Teslamate", {
 
     console.log(this.name + ': Setting up connection to server');
 
-    var s = this.config.mqttServer
+    var s = this.config.mqttServer;
     var serverKey = this.makeServerKey(s);
     console.log(this.name + ': Adding config for ' + s.address + ' port ' + s.port + ' user ' + s.user);
 
     for (let key in Topics) {
       var topic = Topics[key];
-      console.log(topic);
+      console.log(this.name + ': Subscribing to topic: ' + topic);
       this.subscriptions[key] = {
         topic: topic,
         serverKey: serverKey,
@@ -114,25 +128,28 @@ Module.register("MMM-Teslamate", {
       };
     }
 
+    console.log(this.name + ": Subscriptions initialized");
     this.openMqttConnection();
-    var self = this;
-
   },
 
   openMqttConnection: function () {
+    console.log(this.name + ": openMqttConnection called");
     this.sendSocketNotification('MQTT_CONFIG', this.config);
   },
 
   socketNotificationReceived: function (notification, payload) {
+    console.log(this.name + ": socketNotificationReceived - Notification: " + notification);
     if (notification === 'MQTT_PAYLOAD') {
       if (payload != null) {
+        console.log(this.name + ": MQTT_PAYLOAD received for serverKey: " + payload.serverKey + " and topic: " + payload.topic);
         for (let key in this.subscriptions) {
-          sub = this.subscriptions[key];
-          //console.log(sub);
+          let sub = this.subscriptions[key];
           if (sub.serverKey == payload.serverKey && sub.topic == payload.topic) {
             var value = payload.value;
             sub.value = value;
             sub.time = payload.time;
+
+            console.log(this.name + ": Updated subscription for key: " + key + " with value: " + value);
 
             this.subscriptions[key] = sub;
           }
@@ -145,12 +162,15 @@ Module.register("MMM-Teslamate", {
   },
 
   triggerDomUpdate: function () {
+    console.log(this.name + ": triggerDomUpdate called");
     // Render immediately if we never rendered before or if it's more than 5s ago (configurable)
     if (!this.lastRenderTimestamp || this.lastRenderTimestamp <= (Date.now() - this.config.updatePeriod * 1000)) {
+      console.log(this.name + ": Immediate DOM update");
       this.updateDom();
       this.lastRenderTimestamp = Date.now();
     // Schedule a render in 5s if one isn't scheduled already
     } else if (!this.nextRenderTimer) {
+      console.log(this.name + ": Scheduling DOM update");
       this.nextRenderTimer = setTimeout(() => {
         this.updateDom();
         this.lastRenderTimestamp = Date.now();
@@ -160,6 +180,7 @@ Module.register("MMM-Teslamate", {
   },
 
   getDom: function () {
+    console.log(this.name + ": getDom called");
     const kmToMiFixed = function (miles, fixed) {
       return (miles / 1.609344).toFixed(fixed);
     };
@@ -167,10 +188,14 @@ Module.register("MMM-Teslamate", {
     const cToFFixed = function (celcius, fixed) {
       return ((celcius * 9 / 5) + 32).toFixed(fixed);
     };
+
+    const barToPSI = function (bar, fixed) {
+      return (bar * 14.503773773).toFixed(fixed);
+    };
+
     const wrapper = document.createElement('div');
 
     const carName = this.subscriptions["name"].value;
-    //TODO is this interesting to see displayed?
     const state = this.subscriptions["state"].value;
     const latitude = this.subscriptions["lat"].value;
     const longitude = this.subscriptions["lon"].value;
@@ -194,8 +219,7 @@ Module.register("MMM-Teslamate", {
     const isPreconditioning = this.subscriptions["preconditioning"].value;
     const isHealthy = this.subscriptions["health"].value;
     const isUpdateAvailable = this.subscriptions["update_available"].value;
-
-    //const gUrl = "https://www.google.com/maps/embed/v1/place?key=" + this.config.gMapsApiKey + "&q=" + latitude + "," + longitude + "&zoom=" + this.config.mapZoomLevel;
+    const geofence = this.subscriptions["geofence"].value;
 
     var idealRange = this.subscriptions["ideal_range"].value ? this.subscriptions["ideal_range"].value : 0;
     var estRange = this.subscriptions["est_range"].value ? this.subscriptions["est_range"].value : 0;
@@ -203,6 +227,11 @@ Module.register("MMM-Teslamate", {
     var outside_temp = this.subscriptions["outside_temp"].value ? this.subscriptions["outside_temp"].value : 0;
     var inside_temp = this.subscriptions["inside_temp"].value ? this.subscriptions["inside_temp"].value : 0;
     var odometer = this.subscriptions["odometer"].value ? this.subscriptions["odometer"].value : 0;
+
+    var tpms_pressure_fl = this.subscriptions["tpms_pressure_fl"].value ? this.subscriptions["tpms_pressure_fl"].value : 0;
+    var tpms_pressure_fr = this.subscriptions["tpms_pressure_fr"].value ? this.subscriptions["tpms_pressure_fr"].value : 0;
+    var tpms_pressure_rl = this.subscriptions["tpms_pressure_rl"].value ? this.subscriptions["tpms_pressure_rl"].value : 0;
+    var tpms_pressure_rr = this.subscriptions["tpms_pressure_rr"].value ? this.subscriptions["tpms_pressure_rr"].value : 0;
 
     if (!this.config.imperial) {
       idealRange = (idealRange * 1.0).toFixed(0);
@@ -212,6 +241,11 @@ Module.register("MMM-Teslamate", {
 
       outside_temp = (outside_temp * 1.0).toFixed(1);
       inside_temp = (inside_temp * 1.0).toFixed(1);
+
+      tpms_pressure_fl = (tpms_pressure_fl * 1.0).toFixed(1);
+      tpms_pressure_fr = (tpms_pressure_fr * 1.0).toFixed(1);
+      tpms_pressure_rl = (tpms_pressure_rl * 1.0).toFixed(1);
+      tpms_pressure_rr = (tpms_pressure_rr * 1.0).toFixed(1);
     } else {
       idealRange = kmToMiFixed(idealRange, 0);
       estRange = kmToMiFixed(estRange, 0);
@@ -220,6 +254,11 @@ Module.register("MMM-Teslamate", {
 
       outside_temp = cToFFixed(outside_temp, 1);
       inside_temp = cToFFixed(inside_temp, 1);
+
+      tpms_pressure_fl = barToPSI(tpms_pressure_fl,1);
+      tpms_pressure_fr = barToPSI(tpms_pressure_fr,1);
+      tpms_pressure_rl = barToPSI(tpms_pressure_rl,1);
+      tpms_pressure_rr = barToPSI(tpms_pressure_rr,1);
     }
 
     const data = {
@@ -228,9 +267,10 @@ Module.register("MMM-Teslamate", {
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
       doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
-      isPreconditioning
+      isPreconditioning, geofence, tpms_pressure_fl, tpms_pressure_fr, tpms_pressure_rl, tpms_pressure_rr
     }
 
+    console.log(this.name + ": Generating DOM with data: ", data);
     //always graphic mode
     this.generateGraphicDom(wrapper, data);
 
@@ -242,27 +282,16 @@ Module.register("MMM-Teslamate", {
   },
 
   generateTableDom: function (wrapper, data) {
+    console.log(this.name + ": generateTableDom called with data: ", data);
+
     const {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
       chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
       doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
-      isPreconditioning
+      isPreconditioning, geofence, tpms_pressure_fl, tpms_pressure_fr, tpms_pressure_rl, tpms_pressure_rr
     } = data;
-
-    //const getBatteryLevelClass = function (bl, warn, danger) {
-    //  if (bl < danger) {
-    //    return 'danger';
-    //  }
-    //  if (bl < warn) {
-    //    return 'warning';
-    //  }
-    //  if (bl >= warn) {
-    //    return 'ok';
-    //  }
-    //  return '';
-    //};
 
     const makeSpan = function (className, content) {
       var span = document.createElement("span");
@@ -280,7 +309,7 @@ Module.register("MMM-Teslamate", {
       returnStr += (diffHrs > 0 ? (diffHrs + " Hour" + (diffHrs > 1 ? "s" : "") + ", ") : "");
       return returnStr + (diffMins > 0 ? (diffMins + " Min" + (diffMins > 1 ? "s" : "")) : "");
     }
-
+    
     //TODO bother formatting days? Poor trickle chargers...
     const makeChargeRemString = function (remHrs) {
       const hrs = Math.floor(remHrs);
@@ -289,31 +318,24 @@ Module.register("MMM-Teslamate", {
       return (hrs > 0 ? (hrs + " Hour" + (hrs > 1 ? "s" : "") + ", ") : "") + (mins > 0 ? (mins + " Min" + (mins > 1 ? "s" : "")) : "");
     }
 
-    //var title = document.createElement("h2");
-    //title.className = "mqtt-title";
-    //var iconSpan = document.createElement("span");
-
-    //TODO does this need to be "classlist"?
-    //iconSpan.className = "zmdi zmdi-car zmdi-hc-2x icon"
-    //title.innerHTML = carName;
-    //title.prepend(iconSpan);
-
-    //wrapper.appendChild(title);
+    const fontSize = this.config.sizeOptions.fontSize || '.9rem';
+    const lineHeight = this.config.sizeOptions.lineHeight || '1rem';
+    const lineStyle = 'font-size: ' + fontSize + ';line-height: ' + lineHeight + ';';
 
     var attrList = document.createElement("ul");
     attrList.className = "mattributes";
 
-    //attrList.appendChild(rangeCompare);
-
     if (charging) {
       var energyAddedLi = document.createElement("li");
       energyAddedLi.className = "mattribute";
+      energyAddedLi.style = lineStyle;
       energyAddedLi.appendChild(makeSpan("icon zmdi zmdi-input-power zmdi-hc-fw", ""));
       energyAddedLi.appendChild(makeSpan("name", "Charge Added"));
       energyAddedLi.appendChild(makeSpan("value", energyAdded + " kWh"));
 
       var timeToFullLi = document.createElement("li");
       timeToFullLi.className = "mattribute";
+      timeToFullLi.style = lineStyle;
       timeToFullLi.appendChild(makeSpan("icon zmdi zmdi-time zmdi-hc-fw", ""));
       timeToFullLi.appendChild(makeSpan("name", "Time to " + chargeLimitSOC + "%"));
       timeToFullLi.appendChild(makeSpan("value", makeChargeRemString(timeToFull)));
@@ -322,6 +344,7 @@ Module.register("MMM-Teslamate", {
     } else if (pluggedIn && chargeStart && chargeStart !== "") {
       var chargeStartLi = document.createElement("li");
       chargeStartLi.className = "mattribute";
+      chargeStartLi.style = lineStyle;
       chargeStartLi.appendChild(makeSpan("icon zmdi zmdi-time zmdi-hc-fw", ""));
       chargeStartLi.appendChild(makeSpan("name", "Charge Starting"));
       chargeStartLi.appendChild(makeSpan("value", makeChargeStartString(chargeStart)));
@@ -331,27 +354,60 @@ Module.register("MMM-Teslamate", {
     if (this.config.displayOptions.odometer.visible) {
       var odometerLi = document.createElement("li");
       odometerLi.className = "mattribute";
-      if (this.config.displayOptions.odometer.fontSize !== null) {
-        odometerLi.style = 'font-size: ' + parseFloat(this.config.displayOptions.odometer.fontSize) + 'rem';
-      }
-
+      odometerLi.style = lineStyle;
       odometerLi.appendChild(makeSpan("icon zmdi zmdi-dot-circle-alt zmdi-hc-fw", ""));
       odometerLi.appendChild(makeSpan("name", "Odometer"));
       odometerLi.appendChild(makeSpan("value", odometer + (!this.config.imperial ? " Km" : " Mi")));
 
       attrList.appendChild(odometerLi);
     }
+   
+    if (this.config.displayOptions.tpms.visible) {
+      var tpmsLi = document.createElement("li");
+      tpmsLi.className = "mattribute";
+      tpmsLi.style = lineStyle;
+      tpmsLi.appendChild(makeSpan("icon zmdi zmdi-star-circle zmdi-hc-fw", ""));
+      tpmsLi.appendChild(makeSpan("name", "TPMS"));
+      tpmsLi.appendChild(makeSpan("value", tpms_pressure_fl + ",  " + tpms_pressure_fr + ",  " + tpms_pressure_rl + ",  " + tpms_pressure_rr + (!this.config.imperial ? " (bar)" : " (psi)")));
+
+      attrList.appendChild(tpmsLi);
+    }
+
+    if (this.config.displayOptions.geofence.visible && geofence !== null && geofence !== "") {
+      var geofenceLi = document.createElement("li");
+      geofenceLi.className = "mattribute";
+      geofenceLi.style = lineStyle;
+      geofenceLi.appendChild(makeSpan("icon zmdi zmdi-my-location zmdi-hc-fw", ""));
+      geofenceLi.appendChild(makeSpan("name", "Location"));
+      geofenceLi.appendChild(makeSpan("value", geofence));
+
+      attrList.appendChild(geofenceLi);
+    }
+
+    if (this.config.displayOptions.speed.visible && state == "driving") {
+      var speedLi = document.createElement("li");
+      speedLi.className = "mattribute";
+      speedLi.style = lineStyle;
+      speedLi.appendChild(makeSpan("icon zmdi zmdi-run zmdi-hc-fw", ""));
+      speedLi.appendChild(makeSpan("name", "Speed"));
+      speedLi.appendChild(makeSpan("value", speed + (!this.config.imperial ? " km/h" : " mph")));
+
+      attrList.appendChild(speedLi);
+    }
+
     wrapper.appendChild(attrList);
   },
 
   generateGraphicDom: function (wrapper, data) {
+    console.log(this.name + ": generateGraphicDom called with data: ", data);
+
     const {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
-      chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry, gUrl,
+      chargeStart, timeToFull, pluggedIn, energyAdded, locked, sentry,
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
       doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
-      isPreconditioning
+      isPreconditioning, geofence, tpms_pressure_fl, tpms_pressure_fr, tpms_pressure_rl, tpms_pressure_rr
     } = data;
 
     const stateIcons = [];
@@ -399,7 +455,8 @@ Module.register("MMM-Teslamate", {
     // calculate scales
     var layBatScaleWidth = layBatWidth / 250;  // scale factor normalized to 250
     var layBatScaleHeight = layBatHeight / 75; // scale factor normalized to 75
-    var layScaleHeight = layHeight / 203; // scale factor normalized to 203
+    var layScaleWidth = layWidth / 450;        // scale factor normalized to 203
+    var layScaleHeight = layHeight / 203;      // scale factor normalized to 203
 
     const teslaModel = this.config.carImageOptions.model || "m3";
     const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
@@ -416,8 +473,7 @@ Module.register("MMM-Teslamate", {
     const batteryReserveVisible = (battery - batteryUsable) > 1; // at <= 1% reserve the app and the car don't show it, so we won't either
 
     const batteryOverlayIcon = charging ? `<span class="mdi mdi-flash bright light"></span>` :
-      batteryReserveVisible ? `<span class="mdi mdi-snowflake bright light"></span>` :
-        '';
+      batteryReserveVisible ? `<span class="mdi mdi-snowflake bright light"></span>` : '';
 
     const batteryBigNumber = this.config.rangeDisplay === "%" ? batteryUsable : idealRange;
     const batteryUnit = this.config.rangeDisplay === "%" ? "%" : (this.config.imperial ? "mi" : "km");
@@ -441,7 +497,6 @@ Module.register("MMM-Teslamate", {
                     margin-top: ${layBatTopMargin}px;
                     border: 2px solid #aaa;
                     border-radius: ${10 * layBatScaleHeight}px">
-
           <!-- Plus pole -->
           <div style="position: relative; top: ${(layBatHeight - layBatHeight / 4) / 2 - 1}px; left: ${layBatWidth}px;
                       width: ${8 * layBatScaleWidth}px; height: ${layBatHeight / 4}px;
@@ -523,6 +578,7 @@ Module.register("MMM-Teslamate", {
                     opacity: ${imageOpacity}; 
                     background-image: url('${teslaImageUrl}'); 
                     background-size: ${layWidth}px;
+                    background-repeat: no-repeat;
                     background-position: 0px ${imageOffset}px;"></div>
         <div style="z-index: 2; position: relative; top: 0px; left: 0px; margin-top: ${topOffset}px;">
 
