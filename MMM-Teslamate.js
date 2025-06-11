@@ -24,6 +24,8 @@ Module.register("MMM-Teslamate", {
       batWidth: 250,
       batHeight: 75,
       topOffset: -40,
+      scaleHeight: 0,
+      scaleWidth: 0,
     },
     displayOptions: {
       odometer: {
@@ -33,6 +35,8 @@ Module.register("MMM-Teslamate", {
       batteryBar: {
         visible: true,
         topMargin: 0,
+        scaleHeight: 0,
+        scaleWidth: 0,
       },
       temperatureIcons: {
         topMargin: 0,
