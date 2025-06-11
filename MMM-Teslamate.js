@@ -258,7 +258,7 @@ Module.register("MMM-Teslamate", {
       outside_temp = cToFFixed(outside_temp, 1);
       inside_temp = cToFFixed(inside_temp, 1);
 
-      tpms_fl = barToPSI(tpms_fl,1);
+      tpms_pressure_fl = barToPSI(tpms_pressure_fl,1);
       tpms_pressure_fr = barToPSI(tpms_pressure_fr,1);
       tpms_pressure_rl = barToPSI(tpms_pressure_rl,1);
       tpms_pressure_rr = barToPSI(tpms_pressure_rr,1);
