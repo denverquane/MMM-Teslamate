@@ -351,7 +351,7 @@ Module.register("MMM-Teslamate", {
       attrList.appendChild(chargeStartLi);
     }
 
-    if (this.config.displayOptions.odometer.visible) {
+    if (this.config.displayOptions?.odometer?.visible ?? true) {
       var odometerLi = document.createElement("li");
       odometerLi.className = "mattribute";
       odometerLi.style = lineStyle;
@@ -362,7 +362,7 @@ Module.register("MMM-Teslamate", {
       attrList.appendChild(odometerLi);
     }
    
-    if (this.config.displayOptions.tpms.visible) {
+    if (this.config.displayOptions?.tpms?.visible ?? true) {
       var tpmsLi = document.createElement("li");
       tpmsLi.className = "mattribute";
       tpmsLi.style = lineStyle;
@@ -373,7 +373,7 @@ Module.register("MMM-Teslamate", {
       attrList.appendChild(tpmsLi);
     }
 
-    if (this.config.displayOptions.geofence.visible && geofence !== null && geofence !== "") {
+    if ((this.config.displayOptions?.geofence?.visible ?? true) && geofence !== null && geofence !== "") {
       var geofenceLi = document.createElement("li");
       geofenceLi.className = "mattribute";
       geofenceLi.style = lineStyle;
@@ -384,7 +384,7 @@ Module.register("MMM-Teslamate", {
       attrList.appendChild(geofenceLi);
     }
 
-    if (this.config.displayOptions.speed.visible && state == "driving") {
+    if ((this.config.displayOptions?.speed?.visible ?? true) && state == "driving") {
       var speedLi = document.createElement("li");
       speedLi.className = "mattribute";
       speedLi.style = lineStyle;
@@ -448,7 +448,7 @@ Module.register("MMM-Teslamate", {
     // the battery images itself
     const layBatWidth = this.config.sizeOptions.batWidth || 250; // px, default: 250
     const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
-    const layBatTopMargin = this.config.displayOptions.batteryBar.topMargin || 0; // px, default: 0
+    const layBatTopMargin = this.config.displayOptions?.batteryBar?.topMargin ?? 0; // px, default: 0
     // top offset - to reduce visual distance to the module above
     const topOffset = this.config.sizeOptions.topOffset || -40; // px, default: -40
 
@@ -489,7 +489,7 @@ Module.register("MMM-Teslamate", {
        <span class="bright light small">${outside_temp}°</span>`;
 
     let batteryBarHtml = '';
-    if (this.config.displayOptions.batteryBar.visible) {
+    if (this.config.displayOptions?.batteryBar?.visible ?? true) {
       batteryBarHtml = `
         <!-- Battery graphic - outer border -->
         <div style="margin-left: ${(layWidth - layBatWidth) / 2}px;
@@ -613,7 +613,7 @@ Module.register("MMM-Teslamate", {
 
           <!-- Optional graphic mode icons below the car -->
           <div style="text-align: center; 
-                      margin-top: ${this.config.displayOptions.temperatureIcons.topMargin || 0}px;
+                      margin-top: ${this.config.displayOptions?.temperatureIcons?.topMargin ?? 0}px;
                       ${temperatureIcons == "" ? 'display: none;' : ''}
                       ${state == "offline" || state == "asleep" || state == "suspended" ? 'opacity: 0.3;' : ''}">
             ${temperatureIcons}
