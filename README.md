@@ -95,6 +95,8 @@ Then run `npm ci` inside the new cloned folder, and make sure to add the module 
             // play with this until it looks about right.
             // tested values: 0 for m3/STUD_3QTR, 25 for ms/STUD_SIDE
             verticalOffset: 0,
+            // scale the image to remove excessive background on the sides
+            scale: 1,
             opacity: 0.5
         },
         // show inside and outside temperatures below the car image: when AC or preconditioning is running (default), always, or never

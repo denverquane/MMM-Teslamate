@@ -25,7 +25,7 @@ Module.register("MMM-Teslamate", {
       batHeight: 75,
       topOffset: -40,
       fontSize: '.9rem', // null (to use default/css) or rem/px
-      lineHeight: '1rem', // null (to use default/css) or rem/px
+      lineHeight: '1.2rem', // null (to use default/css) or rem/px
     },
     displayOptions: {
       odometer: {
@@ -318,8 +318,8 @@ Module.register("MMM-Teslamate", {
       return (hrs > 0 ? (hrs + " Hour" + (hrs > 1 ? "s" : "") + ", ") : "") + (mins > 0 ? (mins + " Min" + (mins > 1 ? "s" : "")) : "");
     }
 
-    const fontSize = this.config.sizeOptions.fontSize || '.9rem';
-    const lineHeight = this.config.sizeOptions.lineHeight || '1rem';
+    const fontSize = this.config.sizeOptions?.fontSize || '.9rem';
+    const lineHeight = this.config.sizeOptions?.lineHeight || '1.2rem';
     const lineStyle = 'font-size: ' + fontSize + ';line-height: ' + lineHeight + ';';
 
     var attrList = document.createElement("ul");
@@ -357,7 +357,7 @@ Module.register("MMM-Teslamate", {
       odometerLi.style = lineStyle;
       odometerLi.appendChild(makeSpan("icon zmdi zmdi-dot-circle-alt zmdi-hc-fw", ""));
       odometerLi.appendChild(makeSpan("name", "Odometer"));
-      odometerLi.appendChild(makeSpan("value", odometer + (!this.config.imperial ? " Km" : " Mi")));
+      odometerLi.appendChild(makeSpan("value", odometer + (!this.config.imperial ? " km" : " mi")));
 
       attrList.appendChild(odometerLi);
     }
@@ -443,29 +443,30 @@ Module.register("MMM-Teslamate", {
 
     // size options
     // size of the icons + battery (above text)
-    const layWidth = this.config.sizeOptions.width || 450; // px, default: 450
-    const layHeight = this.config.sizeOptions.height || 203; // px, default: 203
+    const layWidth = this.config.sizeOptions?.width ?? 450; // px, default: 450
+    const layHeight = this.config.sizeOptions?.height ?? 203; // px, default: 203
     // the battery images itself
-    const layBatWidth = this.config.sizeOptions.batWidth || 250; // px, default: 250
-    const layBatHeight = this.config.sizeOptions.batHeight || 75; // px, default: 75
+    const layBatWidth = this.config.sizeOptions?.batWidth ?? 250; // px, default: 250
+    const layBatHeight = this.config.sizeOptions?.batHeight ?? 75; // px, default: 75
     const layBatTopMargin = this.config.displayOptions?.batteryBar?.topMargin ?? 0; // px, default: 0
     // top offset - to reduce visual distance to the module above
-    const topOffset = this.config.sizeOptions.topOffset || -40; // px, default: -40
+    const topOffset = this.config.sizeOptions?.topOffset ?? -40; // px, default: -40
 
     // calculate scales
     var layBatScaleWidth = layBatWidth / 250;  // scale factor normalized to 250
     var layBatScaleHeight = layBatHeight / 75; // scale factor normalized to 75
-    var layScaleWidth = layWidth / 450;        // scale factor normalized to 203
+    var layScaleWidth = layWidth / 450;        // scale factor normalized to 450
     var layScaleHeight = layHeight / 203;      // scale factor normalized to 203
 
-    const teslaModel = this.config.carImageOptions.model || "m3";
-    const teslaView = this.config.carImageOptions.view || "STUD_3QTR";
-    const teslaOptions = this.config.carImageOptions.options || "PPSW,W32B,SLR1";
+    const teslaModel = this.config.carImageOptions?.model ?? "m3";
+    const teslaView = this.config.carImageOptions?.view ?? "STUD_3QTR";
+    const teslaOptions = this.config.carImageOptions?.options ?? "PPSW,W32B,SLR1";
 
     const teslaImageWidth = 720; // Tesla compositor stopped returning arbitrary-sized images, only steps of 250, 400, 720 etc work now. We use CSS to scale the image to the correct layout width
     const teslaImageUrl = `https://static-assets.tesla.com/v1/compositor/?model=${teslaModel}&view=${teslaView}&size=${teslaImageWidth}&options=${teslaOptions}&bkba_opt=1`;
-    const imageOffset = this.config.carImageOptions.verticalOffset || 0;
-    const imageOpacity = this.config.carImageOptions.imageOpacity || 0.4;
+    const imageOffset = this.config.carImageOptions?.verticalOffset ?? 0;
+    const imageOpacity = this.config.carImageOptions?.imageOpacity ?? 0.4;
+    const imageWidth = layWidth * (this.config.carImageOptions?.scale ?? 1);
 
     const renderedStateIcons = stateIcons.map((icon) => `<span class="mdi mdi-${icon}"></span>`)
     const renderedNetworkIcons = networkIcons.map((icon) => `<span class="mdi mdi-${icon}" ${icon == "alert-box" ? "style='color: #f66'" : ""}></span>`)
@@ -508,7 +509,7 @@ Module.register("MMM-Teslamate", {
               <div style="width: ${8 * layBatScaleWidth}px; height: ${layBatHeight / 4}px;
                           opacity: ${imageOpacity};
                           background-image: url('${teslaImageUrl}');
-                          background-size: ${layWidth}px;
+                          background-size: ${imageWidth}px;
                           background-position: -351px ${imageOffset - 152}px"></div>
           </div>
 
@@ -577,9 +578,9 @@ Module.register("MMM-Teslamate", {
                     width: ${layWidth}px; height: ${layHeight}px; 
                     opacity: ${imageOpacity}; 
                     background-image: url('${teslaImageUrl}'); 
-                    background-size: ${layWidth}px;
+                    background-size: ${imageWidth}px;;
                     background-repeat: no-repeat;
-                    background-position: 0px ${imageOffset}px;"></div>
+                    background-position: center ${imageOffset}px;"></div>
         <div style="z-index: 2; position: relative; top: 0px; left: 0px; margin-top: ${topOffset}px;">
 
           <!-- Percentage/range -->
