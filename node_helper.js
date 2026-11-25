@@ -85,6 +85,10 @@ module.exports = NodeHelper.create({
                 port: server.port,
                 options: {},
                 topics: [],
+                // Last payload per topic, replayed to clients that register
+                // after the topics were already subscribed (e.g. a second
+                // browser, or a frontend reload).
+                values: {},
             };
             if (server.user) mqttServer.options.username = server.user;
             if (server.password) mqttServer.options.password = server.password;
@@ -100,6 +104,16 @@ module.exports = NodeHelper.create({
             // Not yet connected: the 'connect' handler subscribes to all topics.
             mqttServer.client.subscribe(newTopics);
         }
+
+        // The broker only sends retained values on subscribe, so a client
+        // that registers for already-subscribed topics would otherwise see
+        // nothing until each value changes. Replay what we have.
+        Object.values(Topics).forEach((topic) => {
+            var cached = mqttServer.values[topic];
+            if (cached) {
+                this.sendSocketNotification('MQTT_PAYLOAD', cached);
+            }
+        });
     },
 
     addConfig: function (config) {
@@ -137,12 +151,14 @@ module.exports = NodeHelper.create({
         });
 
         server.client.on('message', function (topic, payload) {
-            self.sendSocketNotification('MQTT_PAYLOAD', {
+            var message = {
                 serverKey: server.serverKey,
                 topic: topic,
                 value: payload.toString(),
                 time: Date.now()
-            });
+            };
+            server.values[topic] = message;
+            self.sendSocketNotification('MQTT_PAYLOAD', message);
         });
 
     },
