@@ -206,7 +206,8 @@ Module.register("MMM-Teslamate", {
     const chargeStart = this.subscriptions["charge_start"].value;
     const timeToFull = this.subscriptions["charge_time"].value;
     const pluggedIn = this.subscriptions["plugged_in"].value;
-    const charging = pluggedIn && timeToFull > 0.0;
+    // MQTT values are strings, so "false" is truthy: compare explicitly.
+    const charging = pluggedIn == "true" && timeToFull > 0.0;
     const energyAdded = this.subscriptions["charge_added"].value;
     const locked = this.subscriptions["locked"].value;
     const sentry = this.subscriptions["sentry"].value;
@@ -341,7 +342,7 @@ Module.register("MMM-Teslamate", {
       timeToFullLi.appendChild(makeSpan("value", makeChargeRemString(timeToFull)));
       attrList.appendChild(energyAddedLi);
       attrList.appendChild(timeToFullLi);
-    } else if (pluggedIn && chargeStart && chargeStart !== "") {
+    } else if (pluggedIn == "true" && chargeStart && chargeStart !== "") {
       var chargeStartLi = document.createElement("li");
       chargeStartLi.className = "mattribute";
       chargeStartLi.style = lineStyle;
