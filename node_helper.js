@@ -72,19 +72,30 @@ module.exports = NodeHelper.create({
         var serverKey = this.makeServerKey(server);
         console.log(this.name + ': Adding car ' + carID + ' on server ' + serverKey);
 
-        // One MQTT client per broker, shared by every module instance (car)
-        // that uses it. Previously each instance (and each frontend reload)
-        // opened another client without closing the old one, so every
-        // message was delivered once per client.
-        var mqttServer = servers[serverKey];
-        var isNew = !mqttServer;
-        if (isNew) {
+        // One MQTT client per broker and set of credentials, shared by every
+        // module instance (car) that uses them. Previously each instance (and
+        // each frontend reload) opened another client without closing the old
+        // one, so every message was delivered once per client. The pool key
+        // includes the credentials so that an instance never rides on a
+        // connection authenticated as someone else; it's only kept in memory.
+        var poolKey = JSON.stringify([serverKey, server.user || '', server.password || '']);
+        var mqttServer = servers[poolKey];
+        if (!mqttServer) {
             mqttServer = {
                 serverKey: serverKey,
                 address: server.address,
                 port: server.port,
-                options: {},
-                topics: [],
+                // We resubscribe ourselves on every connect, so that our
+                // record of acknowledged topics stays accurate.
+                options: { resubscribe: false },
+                // Topics wanted by registered instances.
+                topics: new Set(),
+                // Topics the broker has acknowledged on the current connection.
+                subscribed: new Set(),
+                // Topics with a SUBSCRIBE in flight on the current connection.
+                pending: new Set(),
+                // Incremented on each connect, to ignore acks from an old one.
+                connection: 0,
                 // Last payload per topic, replayed to clients that register
                 // after the topics were already subscribed (e.g. a second
                 // browser, or a frontend reload).
@@ -92,17 +103,13 @@ module.exports = NodeHelper.create({
             };
             if (server.user) mqttServer.options.username = server.user;
             if (server.password) mqttServer.options.password = server.password;
-            servers[serverKey] = mqttServer;
-        }
-
-        var newTopics = Object.values(Topics).filter((topic) => !mqttServer.topics.includes(topic));
-        mqttServer.topics.push(...newTopics);
-
-        if (isNew) {
+            servers[poolKey] = mqttServer;
+            Object.values(Topics).forEach((topic) => mqttServer.topics.add(topic));
             this.startClient(mqttServer);
-        } else if (newTopics.length > 0 && mqttServer.client.connected) {
-            // Not yet connected: the 'connect' handler subscribes to all topics.
-            mqttServer.client.subscribe(newTopics);
+        } else {
+            Object.values(Topics).forEach((topic) => mqttServer.topics.add(topic));
+            // Also retries topics whose subscription failed earlier.
+            this.subscribeTopics(mqttServer);
         }
 
         // The broker only sends retained values on subscribe, so a client
@@ -113,6 +120,42 @@ module.exports = NodeHelper.create({
             if (cached) {
                 this.sendSocketNotification('MQTT_PAYLOAD', cached);
             }
+        });
+    },
+
+    // Subscribe to every wanted topic that isn't acknowledged or in flight.
+    // A topic counts as subscribed only once the broker grants it, so a
+    // failed subscription is retried the next time an instance registers
+    // (e.g. on frontend reload) or the client reconnects.
+    subscribeTopics: function (server) {
+        if (!server.client || !server.client.connected) {
+            return; // the 'connect' handler subscribes everything
+        }
+        var topics = [...server.topics].filter((topic) => !server.subscribed.has(topic) && !server.pending.has(topic));
+        if (topics.length === 0) {
+            return;
+        }
+        var self = this;
+        var connection = server.connection;
+        topics.forEach((topic) => server.pending.add(topic));
+        console.log(self.name + ': ' + server.serverKey + ' subscribing to ' + topics);
+        server.client.subscribe(topics, function (err, granted) {
+            if (connection !== server.connection) {
+                return; // reconnected since; that connection resubscribes
+            }
+            topics.forEach((topic) => server.pending.delete(topic));
+            if (err) {
+                console.log(self.name + ': ' + server.serverKey + ' subscribe failed: ', err.message || err);
+                return;
+            }
+            (granted || []).forEach(function (grant) {
+                // qos 128 (0x80) or higher is a failure return/reason code.
+                if (grant.qos >= 128) {
+                    console.log(self.name + ': ' + server.serverKey + ' subscription refused for ' + grant.topic + ' (code ' + grant.qos + ')');
+                } else {
+                    server.subscribed.add(grant.topic);
+                }
+            });
         });
     },
 
@@ -146,8 +189,11 @@ module.exports = NodeHelper.create({
 
         server.client.on('connect', function (connack) {
             console.log(self.name + ' connected to ' + mqttServer);
-            console.log(self.name + ': subscribing to ' + server.topics);
-            server.client.subscribe(server.topics);
+            // A new connection starts with no subscriptions of ours.
+            server.connection++;
+            server.subscribed.clear();
+            server.pending.clear();
+            self.subscribeTopics(server);
         });
 
         server.client.on('message', function (topic, payload) {
