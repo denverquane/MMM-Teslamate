@@ -239,7 +239,10 @@ Module.register("MMM-Teslamate", {
     // MQTT values are strings, so "false" is truthy: compare explicitly.
     const isPluggedIn = pluggedIn == "true";
     const charging = isPluggedIn && timeToFull > 0.0;
-    const showChargeStart = !charging && isPluggedIn && chargeStart && chargeStart !== "";
+    // An expired or unparseable start time would render an empty countdown,
+    // so only show it (and run its refresh timer) for a time in the future.
+    const chargeStartMs = Date.parse(chargeStart);
+    const showChargeStart = !charging && isPluggedIn && Number.isFinite(chargeStartMs) && chargeStartMs > Date.now();
     const energyAdded = this.subscriptions["charge_added"].value;
     const locked = this.subscriptions["locked"].value;
     const sentry = this.subscriptions["sentry"].value;
@@ -312,6 +315,7 @@ Module.register("MMM-Teslamate", {
     if (this.config.hybridView)
       this.generateTableDom(wrapper, data);
 
+    // Stops on the first refresh after the start time passes.
     this.setCountdownTimer(this.config.hybridView && showChargeStart);
 
     return wrapper;
