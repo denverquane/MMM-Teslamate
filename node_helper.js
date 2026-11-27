@@ -20,10 +20,15 @@ module.exports = NodeHelper.create({
         locked: topicPrefix + carID + '/locked',
         sentry: topicPrefix + carID + '/sentry_mode',
         windows: topicPrefix + carID + '/windows_open',
+        doors: topicPrefix + carID + '/doors_open',
+        trunk: topicPrefix + carID + '/trunk_open',
+        frunk: topicPrefix + carID + '/frunk_open',
+        user: topicPrefix + carID + '/is_user_present',
 
         outside_temp: topicPrefix + carID + '/outside_temp',
         inside_temp: topicPrefix + carID + '/inside_temp',
         climate_on: topicPrefix + carID + '/is_climate_on',
+        preconditioning: topicPrefix + carID + '/is_preconditioning',
 
         odometer: topicPrefix + carID + '/odometer',
         ideal_range: topicPrefix + carID + '/ideal_battery_range_km',
