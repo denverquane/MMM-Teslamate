@@ -103,6 +103,8 @@ Then run `npm ci` inside the new cloned folder, and make sure to add the module 
         showTemps: "hvac_on", // "always", "never"
         // time in seconds to wait before re-rendering the module on incoming data. prevents high CPU load due to re-rendering on every new data point during driving
         updatePeriod: 5,
+        // log every MQTT message and render step to the browser console (very verbose)
+        debug: false,
     }
 },
 ```

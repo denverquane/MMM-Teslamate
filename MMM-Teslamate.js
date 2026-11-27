@@ -1,15 +1,24 @@
 Module.register("MMM-Teslamate", {
 
   getScripts: function () {
-    console.log(this.name + ": getScripts called");
+    this.debugLog(this.name + ": getScripts called");
     return [];
   },
   getStyles: function () {
-    console.log(this.name + ": getStyles called");
+    this.debugLog(this.name + ": getStyles called");
     return [
       'https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css',
+      'https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css',
       'Teslamate.css',
     ];
+  },
+
+  // Verbose logging is off by default: this module can receive several MQTT
+  // messages per second, and each one used to produce multiple console lines.
+  debugLog: function (...args) {
+    if (this.config?.debug) {
+      console.log(...args);
+    }
   },
 
   // Default module config
@@ -50,15 +59,16 @@ Module.register("MMM-Teslamate", {
     },
     showTemps: "hvac_on",
     updatePeriod: 5,
+    debug: false,
   },
 
   makeServerKey: function (server) {
-    console.log(this.name + ": makeServerKey called with server: ", server);
+    this.debugLog(this.name + ": makeServerKey called with server: ", server);
     return '' + server.address + ':' + (server.port ?? '1883');
   },
 
   start: function () {
-    console.log(this.name + ": start called");
+    this.debugLog(this.name + ": start called");
     const topicPrefix = 'teslamate/cars/' + this.config.carID;
 
     const Topics = {
@@ -105,21 +115,21 @@ Module.register("MMM-Teslamate", {
       tpms_pressure_rr: topicPrefix + '/tpms_pressure_rr',
     };
 
-    console.log(this.name + ": Topics initialized");
+    this.debugLog(this.name + ": Topics initialized");
     this.subscriptions = {
       lat: {},
       lon: {},
     };
 
-    console.log(this.name + ': Setting up connection to server');
+    this.debugLog(this.name + ': Setting up connection to server');
 
     var s = this.config.mqttServer;
     var serverKey = this.makeServerKey(s);
-    console.log(this.name + ': Adding config for ' + s.address + ' port ' + s.port + ' user ' + s.user);
+    this.debugLog(this.name + ': Adding config for ' + s.address + ' port ' + s.port + ' user ' + s.user);
 
     for (let key in Topics) {
       var topic = Topics[key];
-      console.log(this.name + ': Subscribing to topic: ' + topic);
+      this.debugLog(this.name + ': Subscribing to topic: ' + topic);
       this.subscriptions[key] = {
         topic: topic,
         serverKey: serverKey,
@@ -128,49 +138,69 @@ Module.register("MMM-Teslamate", {
       };
     }
 
-    console.log(this.name + ": Subscriptions initialized");
+    this.debugLog(this.name + ": Subscriptions initialized");
     this.openMqttConnection();
   },
 
+  // Renders only happen when data changes, but the "Charge Starting" countdown
+  // is computed from the current time, so refresh once a minute while it's shown.
+  setCountdownTimer: function (shown) {
+    if (shown && !this.countdownTimer) {
+      this.countdownTimer = setInterval(() => this.triggerDomUpdate(), 60 * 1000);
+    } else if (!shown && this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
+  },
+
   openMqttConnection: function () {
-    console.log(this.name + ": openMqttConnection called");
+    this.debugLog(this.name + ": openMqttConnection called");
     this.sendSocketNotification('MQTT_CONFIG', this.config);
   },
 
   socketNotificationReceived: function (notification, payload) {
-    console.log(this.name + ": socketNotificationReceived - Notification: " + notification);
+    this.debugLog(this.name + ": socketNotificationReceived - Notification: " + notification);
     if (notification === 'MQTT_PAYLOAD') {
       if (payload != null) {
-        console.log(this.name + ": MQTT_PAYLOAD received for serverKey: " + payload.serverKey + " and topic: " + payload.topic);
+        this.debugLog(this.name + ": MQTT_PAYLOAD received for serverKey: " + payload.serverKey + " and topic: " + payload.topic);
+        // Every instance of this module receives every payload (including
+        // other cars' topics), and Teslamate republishes unchanged values,
+        // so only re-render when one of our own values actually changed.
+        let changed = false;
         for (let key in this.subscriptions) {
           let sub = this.subscriptions[key];
           if (sub.serverKey == payload.serverKey && sub.topic == payload.topic) {
             var value = payload.value;
+            if (sub.value !== value) {
+              changed = true;
+            }
             sub.value = value;
             sub.time = payload.time;
 
-            console.log(this.name + ": Updated subscription for key: " + key + " with value: " + value);
+            this.debugLog(this.name + ": Updated subscription for key: " + key + " with value: " + value);
 
             this.subscriptions[key] = sub;
           }
         }
-        this.triggerDomUpdate();
+        if (changed) {
+          this.triggerDomUpdate();
+        }
       } else {
-        console.log(this.name + ': MQTT_PAYLOAD - No payload');
+        this.debugLog(this.name + ': MQTT_PAYLOAD - No payload');
       }
     }
   },
 
   triggerDomUpdate: function () {
-    console.log(this.name + ": triggerDomUpdate called");
+    this.debugLog(this.name + ": triggerDomUpdate called");
     // Render immediately if we never rendered before or if it's more than 5s ago (configurable)
     if (!this.lastRenderTimestamp || this.lastRenderTimestamp <= (Date.now() - this.config.updatePeriod * 1000)) {
-      console.log(this.name + ": Immediate DOM update");
+      this.debugLog(this.name + ": Immediate DOM update");
       this.updateDom();
       this.lastRenderTimestamp = Date.now();
     // Schedule a render in 5s if one isn't scheduled already
     } else if (!this.nextRenderTimer) {
-      console.log(this.name + ": Scheduling DOM update");
+      this.debugLog(this.name + ": Scheduling DOM update");
       this.nextRenderTimer = setTimeout(() => {
         this.updateDom();
         this.lastRenderTimestamp = Date.now();
@@ -180,7 +210,7 @@ Module.register("MMM-Teslamate", {
   },
 
   getDom: function () {
-    console.log(this.name + ": getDom called");
+    this.debugLog(this.name + ": getDom called");
     const kmToMiFixed = function (miles, fixed) {
       return (miles / 1.609344).toFixed(fixed);
     };
@@ -207,7 +237,12 @@ Module.register("MMM-Teslamate", {
     const timeToFull = this.subscriptions["charge_time"].value;
     const pluggedIn = this.subscriptions["plugged_in"].value;
     // MQTT values are strings, so "false" is truthy: compare explicitly.
-    const charging = pluggedIn == "true" && timeToFull > 0.0;
+    const isPluggedIn = pluggedIn == "true";
+    const charging = isPluggedIn && timeToFull > 0.0;
+    // An expired or unparseable start time would render an empty countdown,
+    // so only show it (and run its refresh timer) for a time in the future.
+    const chargeStartMs = Date.parse(chargeStart);
+    const showChargeStart = !charging && isPluggedIn && Number.isFinite(chargeStartMs) && chargeStartMs > Date.now();
     const energyAdded = this.subscriptions["charge_added"].value;
     const locked = this.subscriptions["locked"].value;
     const sentry = this.subscriptions["sentry"].value;
@@ -268,10 +303,11 @@ Module.register("MMM-Teslamate", {
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
       doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
-      isPreconditioning, geofence, tpms_pressure_fl, tpms_pressure_fr, tpms_pressure_rl, tpms_pressure_rr
+      isPreconditioning, geofence, tpms_pressure_fl, tpms_pressure_fr, tpms_pressure_rl, tpms_pressure_rr,
+      showChargeStart
     }
 
-    console.log(this.name + ": Generating DOM with data: ", data);
+    this.debugLog(this.name + ": Generating DOM with data: ", data);
     //always graphic mode
     this.generateGraphicDom(wrapper, data);
 
@@ -279,11 +315,14 @@ Module.register("MMM-Teslamate", {
     if (this.config.hybridView)
       this.generateTableDom(wrapper, data);
 
+    // Stops on the first refresh after the start time passes.
+    this.setCountdownTimer(this.config.hybridView && showChargeStart);
+
     return wrapper;
   },
 
   generateTableDom: function (wrapper, data) {
-    console.log(this.name + ": generateTableDom called with data: ", data);
+    this.debugLog(this.name + ": generateTableDom called with data: ", data);
 
     const {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
@@ -291,7 +330,8 @@ Module.register("MMM-Teslamate", {
       idealRange, estRange, speed, outside_temp, inside_temp, odometer,
       windowsOpen, batteryUsable, isClimateOn, isHealthy, charging,
       doorsOpen, trunkOpen, frunkOpen, isUserPresent, isUpdateAvailable,
-      isPreconditioning, geofence, tpms_pressure_fl, tpms_pressure_fr, tpms_pressure_rl, tpms_pressure_rr
+      isPreconditioning, geofence, tpms_pressure_fl, tpms_pressure_fr, tpms_pressure_rl, tpms_pressure_rr,
+      showChargeStart
     } = data;
 
     const makeSpan = function (className, content) {
@@ -342,7 +382,7 @@ Module.register("MMM-Teslamate", {
       timeToFullLi.appendChild(makeSpan("value", makeChargeRemString(timeToFull)));
       attrList.appendChild(energyAddedLi);
       attrList.appendChild(timeToFullLi);
-    } else if (pluggedIn == "true" && chargeStart && chargeStart !== "") {
+    } else if (showChargeStart) {
       var chargeStartLi = document.createElement("li");
       chargeStartLi.className = "mattribute";
       chargeStartLi.style = lineStyle;
@@ -400,7 +440,7 @@ Module.register("MMM-Teslamate", {
   },
 
   generateGraphicDom: function (wrapper, data) {
-    console.log(this.name + ": generateGraphicDom called with data: ", data);
+    this.debugLog(this.name + ": generateGraphicDom called with data: ", data);
 
     const {
       carName, state, latitude, longitude, battery, chargeLimitSOC,
@@ -571,7 +611,6 @@ Module.register("MMM-Teslamate", {
 
     wrapper.innerHTML = `
       <div style="width: ${layWidth}px; height: ${layHeight}px;">
-        <link href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"> 
         <div style="z-index: 1; 
                     position: relative; top: 0px; left: 0px; 
                     margin-top: ${topOffset}px;
